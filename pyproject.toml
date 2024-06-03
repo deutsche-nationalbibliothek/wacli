@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "dnb-wacli"
+version = "0.1.0"
+description = ""
+authors = ["Natanael Arndt <arndtn@gmail.com>"]
+license = "GPL-3.0+"
+readme = "README.md"
+packages = [{include = "wacli"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+rdflib = "^7.0.0"
+click = "^8.1.7"
+loguru = "^0.7.2"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.4.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+wacli = "wacli.run:cli"
