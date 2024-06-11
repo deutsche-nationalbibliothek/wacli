@@ -30,7 +30,8 @@ def test_select(ctx):
 @cli.command()
 @click.pass_context
 def test_construct(ctx):
-    store = SPARQLStore(query_endpoint=ctx.obj["endpoint"])
+    # specify format due to https://github.com/ad-freiburg/qlever/issues/1372
+    store = SPARQLStore(query_endpoint=ctx.obj["endpoint"], returnFormat="turtle")
     remote_graph = Graph(store=store)
     res = remote_graph.query("""
         construct {
@@ -59,9 +60,9 @@ def list(ctx):
         "rdact", Namespace("http://rdaregistry.info/termList/RDACarrierType/")
     )
 
-    store = SPARQLStore(query_endpoint=ctx.obj["endpoint"])
+    store = SPARQLStore(query_endpoint=ctx.obj["endpoint"], returnFormat="turtle")
     remote_graph = Graph(store=store, namespace_manager=namespaces)
-    temporary_graph = remote_graph.query("""
+    remote_result = remote_graph.query("""
         CONSTRUCT {
           ?page foaf:isPrimaryTopicOf ?topic;
                 dc:title ?title;
@@ -83,10 +84,11 @@ def list(ctx):
             ?snapshot a ?snapshot_type
           }
           filter (!bound(?snapshot_type))
-        } LIMIT 1000
+        }
     """)
-    logger.debug(f"store is: {temporary_graph.store}")
-    websites_graph = temporary_graph.query("""
+    temporary_graph = remote_result.graph
+    temporary_graph.namespace_manager = namespaces
+    local_result = temporary_graph.query("""
         CONSTRUCT {
           ?page foaf:isPrimaryTopicOf ?topic;
                 dc:title ?title;
@@ -105,9 +107,11 @@ def list(ctx):
               wdrs:describedby ?description .
           ?description dcterms:modified ?modification .
           bind(SUBSTR(str(?identifier), 9) as ?idn)
-        } LIMIT 1000
+        }
     """)
-    idn_result = websites_graph.query("""
+    website_graph = local_result.graph
+    website_graph.namespace_manager = namespaces
+    idn_result = website_graph.query("""
         select distinct ?idn {
             ?snapshot dcterms:isPartOf ?page .
             ?snapshot gndo:gndIdentifier ?idn .
