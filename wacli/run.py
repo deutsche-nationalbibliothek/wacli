@@ -1,8 +1,9 @@
 import click
-from rdflib import Graph
-from rdflib.plugins.stores.sparqlstore import SPARQLStore
-from rdflib.namespace import Namespace, NamespaceManager
 from loguru import logger
+from rdflib import Graph
+from rdflib.namespace import Namespace, NamespaceManager
+from rdflib.plugins.stores.sparqlstore import SPARQLStore
+
 
 @click.group()
 @click.option("--endpoint", envvar="SPARQL_TITLE_DATA")
@@ -10,6 +11,7 @@ from loguru import logger
 def cli(ctx, endpoint):
     ctx.ensure_object(dict)
     ctx.obj["endpoint"] = endpoint
+
 
 @cli.command()
 @click.pass_context
@@ -23,6 +25,7 @@ def test_select(ctx):
     """)
     for row in res:
         logger.debug(f"{row["s"]}, {row["p"]}, {row["o"]}")
+
 
 @cli.command()
 @click.pass_context
@@ -38,6 +41,7 @@ def test_construct(ctx):
     """)
     logger.debug(res.serialize(format="turtle"))
 
+
 @cli.command()
 @click.pass_context
 def list(ctx):
@@ -51,7 +55,9 @@ def list(ctx):
     namespaces.bind("gndo", Namespace("https://d-nb.info/standards/elementset/gnd#"))
     namespaces.bind("xsd", Namespace("http://www.w3.org/2001/XMLSchema#"))
     namespaces.bind("wdrs", Namespace("http://www.w3.org/2007/05/powder-s#"))
-    namespaces.bind("rdact", Namespace("http://rdaregistry.info/termList/RDACarrierType/"))
+    namespaces.bind(
+        "rdact", Namespace("http://rdaregistry.info/termList/RDACarrierType/")
+    )
 
     store = SPARQLStore(query_endpoint=ctx.obj["endpoint"])
     remote_graph = Graph(store=store, namespace_manager=namespaces)
