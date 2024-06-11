@@ -19,7 +19,7 @@ First you need to set the environment variables:
 $ source default.env
 ```
 
-List random IDNs for snapshots
+List IDNs of the snapshots
 
 ```
 $ poetry run wacli list
