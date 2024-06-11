@@ -58,8 +58,9 @@ def test_construct(ctx):
 
 
 @cli.command()
+@click.option("--graph-file", envvar="WEBSITE_GRAPH_FILE")
 @click.pass_context
-def list(ctx):
+def load_graph(ctx, graph_file):
     remote_graph = Graph(store=ctx.obj["store_construct"], namespace_manager=namespaces)
     remote_result = remote_graph.query("""
         CONSTRUCT {
@@ -110,6 +111,14 @@ def list(ctx):
     """)
     website_graph = local_result.graph
     website_graph.namespace_manager = namespaces
+    website_graph.serialize(graph_file, format="turtle")
+
+@cli.command()
+@click.option("--graph-file", envvar="WEBSITE_GRAPH_FILE")
+@click.pass_context
+def list(ctx, graph_file):
+    website_graph = Graph(namespace_manager=namespaces)
+    website_graph.parse(graph_file)
     idn_result = website_graph.query("""
         select distinct ?idn {
             ?snapshot dcterms:isPartOf ?page .
