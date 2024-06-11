@@ -9,7 +9,7 @@ packages = [{include = "wacli"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-rdflib = "^7.0.0"
+rdflib = {git = "https://github.com/white-gecko/rdflib", rev = "feature/sparql_result_parsing"}
 click = "^8.1.7"
 loguru = "^0.7.2"
 
