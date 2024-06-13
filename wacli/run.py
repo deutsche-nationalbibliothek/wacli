@@ -117,8 +117,9 @@ def load_graph(ctx, graph_file):
 @click.option("--graph-file", envvar="WEBSITE_GRAPH_FILE")
 @click.pass_context
 def list(ctx, graph_file):
-    website_graph = Graph(namespace_manager=namespaces)
+    website_graph = Graph()
     website_graph.parse(graph_file)
+    website_graph.namespace_manager = namespaces
     idn_result = website_graph.query("""
         select distinct ?idn {
             ?snapshot dcterms:isPartOf ?page .
