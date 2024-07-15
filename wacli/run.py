@@ -20,27 +20,32 @@ def cli(ctx, endpoint):
 @cli.command()
 @click.pass_context
 def test_select(ctx):
-    WebGraph(store_select=ctx.obj["store_select"],
-        store_construct=ctx.obj["store_construct"]).test_select()
+    WebGraph(
+        store_select=ctx.obj["store_select"], store_construct=ctx.obj["store_construct"]
+    ).test_select()
 
 
 @cli.command()
 @click.pass_context
 def test_construct(ctx):
-    WebGraph(store_select=ctx.obj["store_select"],
-        store_construct=ctx.obj["store_construct"]).test_construct()
+    WebGraph(
+        store_select=ctx.obj["store_select"], store_construct=ctx.obj["store_construct"]
+    ).test_construct()
 
 
 @cli.command()
 @click.option("--graph-file", envvar="WEBSITE_GRAPH_FILE")
 @click.pass_context
 def load_graph(ctx, graph_file):
-    WebGraph(store_select=ctx.obj["store_select"],
-        store_construct=ctx.obj["store_construct"]).load_graph(graph_file)
+    WebGraph(
+        store_select=ctx.obj["store_select"], store_construct=ctx.obj["store_construct"]
+    ).load_graph(graph_file)
+
 
 @cli.command()
 @click.option("--graph-file", envvar="WEBSITE_GRAPH_FILE")
 @click.pass_context
 def list(ctx, graph_file):
-    WebGraph(store_select=ctx.obj["store_select"],
-        store_construct=ctx.obj["store_construct"]).list(graph_file)
+    WebGraph(
+        store_select=ctx.obj["store_select"], store_construct=ctx.obj["store_construct"]
+    ).list(graph_file)
