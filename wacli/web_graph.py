@@ -6,12 +6,6 @@ from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
 class WebGraph:
     def __init__(self, endpoint: str):
-        self.store_select = SPARQLStore(query_endpoint=endpoint)
-        # specify format due to https://github.com/ad-freiburg/qlever/issues/1372
-        self.store_construct = SPARQLStore(
-            query_endpoint=endpoint, returnFormat="turtle"
-        )
-
         self.namespaces = NamespaceManager(Graph())
         self.namespaces.bind(
             "rdf", Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
@@ -30,10 +24,10 @@ class WebGraph:
             "rdact", Namespace("http://rdaregistry.info/termList/RDACarrierType/")
         )
 
-    def load_graph(self, graph_file):
-        remote_graph = Graph(
-            store=self.store_construct, namespace_manager=self.namespaces
-        )
+    def load_graph(self, endpoint, graph_file):
+        # specify format due to https://github.com/ad-freiburg/qlever/issues/1372
+        store = SPARQLStore(query_endpoint=endpoint, returnFormat="turtle")
+        remote_graph = Graph(store=store, namespace_manager=self.namespaces)
         remote_result = remote_graph.query("""
             CONSTRUCT {
               ?page foaf:isPrimaryTopicOf ?topic;
