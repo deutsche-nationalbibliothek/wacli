@@ -1,13 +1,16 @@
 from loguru import logger
 from rdflib import Graph
 from rdflib.namespace import Namespace, NamespaceManager
-from rdflib.store import Store
+from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
 
 class WebGraph:
-    def __init__(self, store_select: Store = None, store_construct: Store = None):
-        self.store_select = store_select
-        self.store_construct = store_construct
+    def __init__(self, endpoint: str):
+        self.store_select = SPARQLStore(query_endpoint=endpoint)
+        # specify format due to https://github.com/ad-freiburg/qlever/issues/1372
+        self.store_construct = SPARQLStore(
+            query_endpoint=endpoint, returnFormat="turtle"
+        )
 
         self.namespaces = NamespaceManager(Graph())
         self.namespaces.bind(
@@ -26,27 +29,6 @@ class WebGraph:
         self.namespaces.bind(
             "rdact", Namespace("http://rdaregistry.info/termList/RDACarrierType/")
         )
-
-    def test_select(self):
-        remote_graph = Graph(store=self.store_select)
-        res = remote_graph.query("""
-            select * {
-            ?s ?p ?o
-            } limit 10
-        """)
-        for row in res:
-            logger.debug(f"{row["s"]}, {row["p"]}, {row["o"]}")
-
-    def test_construct(self):
-        remote_graph = Graph(store=self.store_construct)
-        res = remote_graph.query("""
-            construct {
-            ?s ?p ?o
-            } where {
-            ?s ?p ?o
-            } limit 10
-        """)
-        logger.debug(res.serialize(format="turtle"))
 
     def load_graph(self, graph_file):
         remote_graph = Graph(
