@@ -71,6 +71,9 @@ class Plugin:
     def __init__(self):
         pass
 
+    def configure(self, configuration):
+        pass
+
 
 class CatalogPlugin(Plugin):
     """Access metadata for web archive files.
@@ -79,6 +82,12 @@ class CatalogPlugin(Plugin):
     """
 
     def __init__(self):
+        pass
+
+    def initialize(self):
+        pass
+
+    def list(self):
         pass
 
 

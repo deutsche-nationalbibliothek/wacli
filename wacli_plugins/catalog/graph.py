@@ -18,7 +18,7 @@ class GraphCatalog(CatalogPlugin):
         """Load the graph"""
         logger.debug("Initiation sequence")
 
-    def list(self, warc):
+    def list(self):
         logger.debug("This is the list")
 
 
