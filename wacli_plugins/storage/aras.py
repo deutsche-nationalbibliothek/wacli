@@ -8,7 +8,7 @@ class ArasStorage(StoragePlugin):
     def configure(self, configuration):
         self.basedirectory = configuration.get("basedirectory")
 
-    def store(self, warc):
+    def store(self, id, content):
         self.basedirectory
         pass
 

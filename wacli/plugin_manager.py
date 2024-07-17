@@ -1,6 +1,7 @@
 import importlib
 import pkgutil
 from collections import defaultdict
+from typing import BinaryIO, TextIO, Union
 
 from loguru import logger
 
@@ -17,6 +18,7 @@ class PluginManager:
             wacli_plugins.indexer,
             wacli_plugins.storage,
         ]
+        self.plugin_factory = PluginFactory(self)
 
     def iter_namespace(self, ns_pkg):
         return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
@@ -36,12 +38,12 @@ class PluginManager:
                 module = importlib.import_module(name)
                 logger.debug(f"available_plugin: {name}: {module.__doc__}")
 
-    def register_plugins(self, plugin_configuration):
+    def register_plugins(self, plugin_configuration: dict):
         for role, plugins in plugin_configuration.items():
             for plugin in plugins:
                 self.register_plugin(role, plugin)
 
-    def register_plugin(self, role, plugin_configuration):
+    def register_plugin(self, role: str, plugin_configuration: dict):
         logger.debug(f"import_module: {plugin_configuration["module"]}")
         plugin_module = importlib.import_module(plugin_configuration["module"])
         if hasattr(plugin_module, "export"):
@@ -53,26 +55,40 @@ class PluginManager:
                 f"configured module: {plugin_configuration["module"]} has no export"
             )
 
-    def get_modules(self, name):
+    def get_modules(self, name: str):
         return self.registry[name]
 
-    def get_all(self, name):
+    def get_all(self, name: str):
         for plugin in self.get_modules(name):
             if "instance" not in plugin:
-                plugin["instance"] = plugin["class"]()
-                plugin["instance"].configure(plugin)
+                plugin["instance"] = self.plugin_factory.get_plugin(plugin)
             yield plugin["instance"]
 
-    def get(self, name):
+    def get(self, name: str):
         return next(self.get_all(name))
+
+
+class PluginFactory:
+    def __init__(self, plugin_manager: PluginManager):
+        self.plugin_manager = plugin_manager
+
+    def get_plugin(self, plugin: dict):
+        instance = plugin["class"]()
+        instance._plugin_manager = self.plugin_manager
+        instance.configure(plugin)
+        return instance
 
 
 class Plugin:
     def __init__(self):
         pass
 
-    def configure(self, configuration):
+    def configure(self, configuration: dict):
         pass
+
+    @property
+    def plugin_manager(self):
+        return self._plugin_manager
 
 
 class CatalogPlugin(Plugin):
@@ -82,7 +98,7 @@ class CatalogPlugin(Plugin):
     """
 
     def __init__(self):
-        pass
+        super(CatalogPlugin, self).__init__()
 
     def initialize(self):
         pass
@@ -95,9 +111,17 @@ class StoragePlugin(Plugin):
     """Implement the storage and retrieval of WARC files."""
 
     def __init__(self):
-        pass
+        super(StoragePlugin, self).__init__()
 
-    def store(self, warc):
+    def store(
+        self,
+        id: str,
+        data: Union[TextIO, BinaryIO, str, bytes, None] = None,
+        mode: str = "w",
+    ):
+        """Store the data at the given id in the storage.
+        If data is None, a writable IO-like object is returned.
+        """
         pass
 
     def retrieve(self, id):
@@ -108,7 +132,7 @@ class IndexerPlugin(Plugin):
     """Implement to trigger the indexing of the WARC files for a replay engine."""
 
     def __init__(self):
-        pass
+        super(IndexerPlugin, self).__init__()
 
     def index(self, warc):
         pass
