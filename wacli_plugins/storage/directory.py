@@ -19,29 +19,6 @@ class DirectoryStorage(StoragePlugin):
     def configure(self, configuration):
         self.path = Path(configuration.get("path"))
 
-    def store(
-        self,
-        id: str,
-        data: Union[TextIO, BinaryIO, str, bytes, None] = None,
-        mode: str = "w",
-    ):
-        """Create a file with the given id as name in the directory."""
-
-        if mode not in ["w", "wb"]:
-            raise Exception("Only 'w' and 'wb' modes are supported.")
-
-        if isinstance(data, BytesIO) or isinstance(data, bytes):
-            if len(mode) == 1:
-                mode += "b"
-
-        with open(self.path / id, mode) as target:
-            if isinstance(data, StringIO) or isinstance(data, BytesIO):
-                logger.debug("Write from stream")
-                target.write(data.getvalue())
-            else:
-                logger.debug("Write data")
-                target.write(data)
-
     @contextmanager
     def get_stream(
         self,
@@ -60,8 +37,39 @@ class DirectoryStorage(StoragePlugin):
         finally:
             target.close()
 
-    def retrieve(self, id):
-        pass
+    def store(
+        self,
+        id: str,
+        data: Union[TextIO, BinaryIO, str, bytes, None] = None,
+        mode: str = "w",
+    ):
+        """Create a file with the given id as name in the directory."""
+
+        if mode not in ["w", "wb"]:
+            raise Exception("Only 'w' and 'wb' modes are supported.")
+
+        if isinstance(data, BytesIO) or isinstance(data, bytes):
+            if len(mode) == 1:
+                mode += "b"
+
+        with self.get_stream(id, mode) as target:
+            if isinstance(data, StringIO) or isinstance(data, BytesIO):
+                logger.debug("Write from stream")
+                target.write(data.read())
+            else:
+                logger.debug("Write data")
+                target.write(data)
+
+    def retrieve(
+        self,
+        id,
+        mode: str = "r",
+    ):
+        if mode not in ["r", "rb"]:
+            raise Exception("Only 'r' and 'rb' modes are supported.")
+
+        with self.get_stream(id, mode) as source:
+            return source.read()
 
 
 export = DirectoryStorage

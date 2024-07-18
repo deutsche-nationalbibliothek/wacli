@@ -116,6 +116,7 @@ def test_get_stream_binary_io(tmp_path):
     assert p.read_text() == content
     assert len(list(tmp_path.iterdir())) == 1
 
+
 def test_retrieve_str(tmp_path):
     plugin_manager = PluginManager()
     plugin_manager.register_plugins(get_plugin_config(tmp_path))

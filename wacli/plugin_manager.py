@@ -110,6 +110,15 @@ class StoragePlugin(Plugin):
     """Implement the storage and retrieval of WARC files."""
 
     @abstractmethod
+    @contextmanager
+    def get_stream(
+        self,
+        id: str,
+        mode: str = "w",
+    ):
+        pass
+
+    @abstractmethod
     def store(
         self,
         id: str,
@@ -119,15 +128,6 @@ class StoragePlugin(Plugin):
         """Store the data at the given id in the storage.
         If data is None, a writable IO-like object is returned.
         """
-        pass
-
-    @abstractmethod
-    @contextmanager
-    def get_stream(
-        self,
-        id: str,
-        mode: str = "w",
-    ):
         pass
 
     @abstractmethod
