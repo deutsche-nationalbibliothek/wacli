@@ -1,0 +1,18 @@
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ns1: <http://www.w3.org/2007/05/powder-s#> .
+@prefix ns2: <https://d-nb.info/standards/elementset/gnd#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://d-nb.info/1234567890> dc:identifier "(DE-101)1234567890"^^xsd:string,
+        "1048103749" ;
+    dcterms:isPartOf <https://d-nb.info/1234567891> ;
+    ns1:describedby <https://d-nb.info/1234567890/about> ;
+    ns2:gndIdentifier "1234567890" .
+
+<https://d-nb.info/1234567891> dc:title "Example"^^xsd:string ;
+    dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+    foaf:isPrimaryTopicOf "http://example.org/"^^xsd:string .
+
+<https://d-nb.info/1234567890/about> dcterms:modified "2017-12-03T16:44:37"^^xsd:dateTime .
