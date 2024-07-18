@@ -71,10 +71,46 @@ def test_store_binary_io(tmp_path):
 
     test_storage = plugin_manager.get("test_storage")
     example_file = "example_file.txt"
-    content = b"some initial binary text data"
-    stream = BytesIO(content)
+    content = "some initial binary text data"
+    binary_content = content.encode("utf-8")
+    stream = BytesIO(binary_content)
 
     test_storage.store(example_file, stream)
+
+    p = tmp_path / example_file
+    assert p.read_text() == content
+    assert len(list(tmp_path.iterdir())) == 1
+
+
+def test_get_stream_text_io(tmp_path):
+    plugin_manager = PluginManager()
+    plugin_manager.register_plugins(get_plugin_config(tmp_path))
+
+    test_storage = plugin_manager.get("test_storage")
+    example_file = "example_file.txt"
+    content = "Hallo"
+
+    with test_storage.get_stream(example_file) as stream:
+        stream.write(content)
+
+    p = tmp_path / example_file
+    assert p.read_text() == content
+    assert len(list(tmp_path.iterdir())) == 1
+
+
+def test_get_stream_binary_io(tmp_path):
+    plugin_manager = PluginManager()
+    plugin_manager.register_plugins(get_plugin_config(tmp_path))
+
+    test_storage = plugin_manager.get("test_storage")
+    example_file = "example_file.txt"
+
+    content = "Hallo binary"
+    binary_content = content.encode("utf-8")
+    logger.debug(binary_content)
+
+    with test_storage.get_stream(example_file, mode="wb") as stream:
+        stream.write(binary_content)
 
     p = tmp_path / example_file
     assert p.read_text() == content
