@@ -17,7 +17,7 @@ def get_plugin_config(endpoint, path):
         ],
         "test_catalog_backend": [
             {
-                "module": "wacli_plugins.storage.directory",
+                "module": "wacli_plugins.storage.file",
                 "path": path,
             }
         ],
@@ -25,12 +25,12 @@ def get_plugin_config(endpoint, path):
 
 
 def test_graph_catalog(tmp_path):
-    plugin_manager = PluginManager()
-    plugin_manager.register_plugins(get_plugin_config(None, tmp_path))
-
     # prepare
-    graph_file = "graph_file.ttl"
-    p = tmp_path / graph_file
+    p = tmp_path / "graph_file.ttl"
+
+    plugin_manager = PluginManager()
+    plugin_manager.register_plugins(get_plugin_config(None, p))
+
     test_directory = Path(os.path.dirname(__file__))
     logger.debug(Path(__file__))
     with (
