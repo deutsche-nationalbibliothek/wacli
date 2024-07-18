@@ -131,7 +131,7 @@ class StoragePlugin(Plugin):
         pass
 
     @abstractmethod
-    def retrieve(self, id):
+    def retrieve(self, id: str):
         pass
 
 
