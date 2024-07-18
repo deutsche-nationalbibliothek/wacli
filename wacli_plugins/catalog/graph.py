@@ -1,6 +1,5 @@
 """This is the directory storage module."""
 
-from loguru import logger
 from rdflib import Graph
 from rdflib.namespace import Namespace, NamespaceManager
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
@@ -96,7 +95,7 @@ class GraphCatalog(CatalogPlugin):
             self.storage_backend.get_stream("graph_file.ttl"), format="turtle"
         )
 
-    def list(self):
+    def list(self) -> list:
         """List available web archive entries by IDN."""
         website_graph = Graph()
         with self.storage_backend.get_stream("graph_file.ttl", mode="r") as graph_file:
