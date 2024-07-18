@@ -12,3 +12,8 @@ tasks:
     cmds:
       - poetry run ruff format
       - poetry run ruff check --fix
+
+  test:
+    desc: Run tests
+    cmds:
+      - poetry run pytest
