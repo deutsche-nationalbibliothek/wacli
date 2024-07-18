@@ -1,4 +1,5 @@
 import click
+from loguru import logger
 
 from .plugin_manager import PluginManager
 
@@ -73,7 +74,8 @@ def load_graph(ctx):
 def list(ctx):
     # WebGraph().list(graph_file)
     catalog = ctx.obj["plugin_manager"].get("catalog")
-    catalog.list()
+    for idn in catalog.list():
+        logger.info(idn)
 
 
 @cli.command()
