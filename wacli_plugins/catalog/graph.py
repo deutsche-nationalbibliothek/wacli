@@ -99,7 +99,8 @@ class GraphCatalog(CatalogPlugin):
     def list(self):
         """List available web archive entries by IDN."""
         website_graph = Graph()
-        website_graph.parse(self.storage_backend.retrieve("graph_file.ttl"))
+        with self.storage_backend.get_stream("graph_file.ttl", mode="r") as graph_file:
+            website_graph.parse(source=graph_file)
         website_graph.namespace_manager = self.namespaces
         idn_result = website_graph.query("""
             select distinct ?idn {
@@ -107,8 +108,7 @@ class GraphCatalog(CatalogPlugin):
                 ?snapshot gndo:gndIdentifier ?idn .
             }
         """)
-        for row in idn_result:
-            logger.debug(row["idn"])
+        return [row["idn"].value for row in idn_result]
 
 
 export = GraphCatalog
