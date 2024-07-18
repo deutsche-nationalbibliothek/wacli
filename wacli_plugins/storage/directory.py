@@ -50,8 +50,8 @@ class DirectoryStorage(StoragePlugin):
     ):
         """Create a file with the given id as name in the directory."""
 
-        if mode not in ["w", "wb"]:
-            raise Exception("Only 'w' and 'wb' modes are supported.")
+        if mode not in ["r", "w", "rb", "wb"]:
+            raise Exception("Only 'r', 'w', 'rb', and 'wb' modes are supported.")
 
         try:
             target = open(self.path / id, mode)
