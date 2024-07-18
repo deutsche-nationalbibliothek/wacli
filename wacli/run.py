@@ -23,7 +23,7 @@ def cli(ctx, endpoint, graph_file, aras_rest_base, aras_repo, warc_dir):
         ],
         "catalog_backend": [
             {
-                "module": "wacli_plugins.storage.directory",
+                "module": "wacli_plugins.storage.file",
                 "path": graph_file,
             }
         ],
