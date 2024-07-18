@@ -1,6 +1,8 @@
 import importlib
 import pkgutil
+from abc import ABC, abstractmethod
 from collections import defaultdict
+from contextlib import contextmanager
 from typing import BinaryIO, TextIO, Union
 
 from loguru import logger
@@ -79,10 +81,8 @@ class PluginFactory:
         return instance
 
 
-class Plugin:
-    def __init__(self):
-        pass
-
+class Plugin(ABC):
+    @abstractmethod
     def configure(self, configuration: dict):
         pass
 
@@ -97,12 +97,11 @@ class CatalogPlugin(Plugin):
     Accessing the metadata should allow to get a complte list of all web archive files.
     """
 
-    def __init__(self):
-        super(CatalogPlugin, self).__init__()
-
+    @abstractmethod
     def initialize(self):
         pass
 
+    @abstractmethod
     def list(self):
         pass
 
@@ -110,9 +109,7 @@ class CatalogPlugin(Plugin):
 class StoragePlugin(Plugin):
     """Implement the storage and retrieval of WARC files."""
 
-    def __init__(self):
-        super(StoragePlugin, self).__init__()
-
+    @abstractmethod
     def store(
         self,
         id: str,
@@ -124,6 +121,16 @@ class StoragePlugin(Plugin):
         """
         pass
 
+    @abstractmethod
+    @contextmanager
+    def get_stream(
+        self,
+        id: str,
+        mode: str = "w",
+    ):
+        pass
+
+    @abstractmethod
     def retrieve(self, id):
         pass
 
@@ -131,8 +138,6 @@ class StoragePlugin(Plugin):
 class IndexerPlugin(Plugin):
     """Implement to trigger the indexing of the WARC files for a replay engine."""
 
-    def __init__(self):
-        super(IndexerPlugin, self).__init__()
-
+    @abstractmethod
     def index(self, warc):
         pass
