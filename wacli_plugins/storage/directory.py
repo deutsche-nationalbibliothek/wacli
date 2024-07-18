@@ -13,9 +13,6 @@ from wacli.plugin_manager import StoragePlugin
 class DirectoryStorage(StoragePlugin):
     """This is the directory storage plugin."""
 
-    def __init__(self):
-        super(DirectoryStorage, self).__init__()
-
     def configure(self, configuration):
         self.path = Path(configuration.get("path"))
 
