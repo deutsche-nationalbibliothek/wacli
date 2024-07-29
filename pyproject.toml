@@ -62,5 +62,6 @@ build-backend = "poetry.core.masonry.api"
 
 
 
+
 [tool.poetry.scripts]
 wacli = "wacli.run:cli"
