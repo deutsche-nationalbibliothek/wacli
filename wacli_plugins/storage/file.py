@@ -1,6 +1,5 @@
 """This is the directory storage module."""
 
-from contextlib import contextmanager
 from os.path import basename, dirname
 from pathlib import Path
 from typing import BinaryIO, TextIO, Union
@@ -16,19 +15,20 @@ class FileStorage(DirectoryStorage):
         self.path = Path(dirname(path))
         self.id = Path(basename(path))
 
-    @contextmanager
     def get_stream(
         self,
-        id: str,
+        selector: list,
         mode: str = "w",
     ):
-        with super(FileStorage, self).get_stream(id=self.id, mode=mode) as parent:
-            yield parent
+        with super(FileStorage, self).get_stream(
+            selector=[self.id], mode=mode
+        ) as parent:
+            return parent
 
     def store(
         self,
         id: str,
-        data: Union[TextIO, BinaryIO, str, bytes, None] = None,
+        data: Union[TextIO, BinaryIO, None] = None,
         mode: str = "w",
     ):
         """Create a file with the given id as name in the directory."""

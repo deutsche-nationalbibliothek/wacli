@@ -1,7 +1,8 @@
 """This is the directory storage module."""
 
-from contextlib import contextmanager
 from io import BytesIO, StringIO
+from os import listdir
+from os.path import isdir, isfile
 from pathlib import Path
 from typing import BinaryIO, TextIO, Union
 
@@ -16,10 +17,9 @@ class DirectoryStorage(StoragePlugin):
     def configure(self, configuration):
         self.path = Path(configuration.get("path"))
 
-    @contextmanager
     def get_stream(
         self,
-        id: str,
+        selector,
         mode: str = "w",
     ):
         """Create a file with the given id as name in the directory."""
@@ -27,17 +27,16 @@ class DirectoryStorage(StoragePlugin):
         if mode not in ["r", "w", "rb", "wb"]:
             raise Exception("Only 'r', 'w', 'rb', and 'wb' modes are supported.")
 
-        try:
-            target = open(self.path / id, mode)
-            logger.debug("yield target")
-            yield target
-        finally:
-            target.close()
+        if selector is None:
+            raise Exception("DirectoryStorage needs a list of explicite IDs")
+
+        for id in selector:
+            yield id, self.retrieve(id, mode)
 
     def store(
         self,
         id: str,
-        data: Union[TextIO, BinaryIO, str, bytes, None] = None,
+        data: Union[TextIO, BinaryIO, None] = None,
         mode: str = "w",
     ):
         """Create a file with the given id as name in the directory."""
@@ -65,8 +64,28 @@ class DirectoryStorage(StoragePlugin):
         if mode not in ["r", "rb"]:
             raise Exception("Only 'r' and 'rb' modes are supported.")
 
-        with self.get_stream(id, mode) as source:
-            return source.read()
+        return self._retrieve(self.path, id, mode)
+
+    def list(self) -> list:
+        return [d for d in listdir(self.path) if isdir(self.path / d)]
+
+    def _retrieve(
+        self,
+        path,
+        id,
+        mode: str = "r",
+    ):
+        if mode not in ["r", "rb"]:
+            raise Exception("Only 'r' and 'rb' modes are supported.")
+
+        if isfile(path / id):
+            yield id, lambda: open(path / id, mode)
+        else:
+            for name in listdir(path / id):
+                yield name, self._retrieve(path / id, name, mode)
+
+    def list(self) -> list:
+        return [d for d in listdir(self.path) if isdir(self.path / d)]
 
 
 export = DirectoryStorage
