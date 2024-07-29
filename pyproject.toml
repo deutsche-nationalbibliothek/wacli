@@ -12,6 +12,8 @@ python = "^3.12"
 rdflib = {git = "https://github.com/white-gecko/rdflib", rev = "feature/sparql_result_parsing"}
 click = "^8.1.7"
 loguru = "^0.7.2"
+aras-py = {git = "https://gitlab.prod.jason.dnb.de/Arndtn/aras-py.git"}
+uuid6 = "^2024.7.10"
 
 [tool.ruff]
 target-version = "py312"
@@ -56,10 +58,6 @@ ruff = "^0.4.4"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-
-
-
 
 [tool.poetry.scripts]
 wacli = "wacli.run:cli"
