@@ -5,7 +5,7 @@ from os.path import basename, dirname
 from pathlib import Path
 from typing import BinaryIO, TextIO, Union
 
-from wacli_plugins.storage.directory import DirectoryStorage
+from wacli_plugins.plugin_types.directory import DirectoryStorage
 
 
 class FileStorage(DirectoryStorage):

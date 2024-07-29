@@ -7,7 +7,7 @@ from typing import BinaryIO, TextIO, Union
 
 from loguru import logger
 
-from wacli.plugin_manager import StoragePlugin
+from wacli.plugin_types import StoragePlugin
 
 
 class DirectoryStorage(StoragePlugin):

@@ -4,7 +4,7 @@ from rdflib import Graph
 from rdflib.namespace import Namespace, NamespaceManager
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
-from wacli.plugin_manager import CatalogPlugin
+from wacli.plugin_types import CatalogPlugin
 
 
 class GraphCatalog(CatalogPlugin):

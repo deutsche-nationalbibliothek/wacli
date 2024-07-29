@@ -1,4 +1,4 @@
-from wacli.plugin_manager import StoragePlugin
+from wacli.plugin_types import StoragePlugin
 
 
 class ArasStorage(StoragePlugin):
