@@ -59,5 +59,6 @@ ruff = "^0.4.4"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+
 [tool.poetry.scripts]
 wacli = "wacli.run:cli"
