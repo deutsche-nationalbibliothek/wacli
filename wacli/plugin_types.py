@@ -51,7 +51,7 @@ class StoragePlugin(Plugin):
     @abstractmethod
     def retrieve(
         self, id: str, mode: str = "r"
-    ) -> list[tuple[str, Callable[[], Union[TextIO, BinaryIO]], dict]]:
+    ) -> tuple[Callable[[], Union[TextIO, BinaryIO]], dict]:
         pass
 
     @abstractmethod
