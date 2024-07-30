@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import BinaryIO, Self, TextIO, Union
 
@@ -25,13 +26,12 @@ class CatalogPlugin(Plugin):
 class StoragePlugin(Plugin):
     """Implement the storage and retrieval of WARC files."""
 
-
     @abstractmethod
     def store(
         self,
         id: str,
-        data: Union[TextIO, BinaryIO, None] = None,
-        mode: str = "w",
+        data: Union[Callable[[], Union[TextIO, BinaryIO]]],
+        metadata={},
     ):
         """Store the data at the given id in the storage.
         If data is None, a writable IO-like object is returned.
@@ -41,7 +41,7 @@ class StoragePlugin(Plugin):
     @abstractmethod
     def store_stream(
         self,
-        stream: dict
+        stream: list[tuple[str, Union[Callable[[], Union[TextIO, BinaryIO]]], dict]],
     ):
         """Store the data at the given id in the storage.
         If data is None, a writable IO-like object is returned.
@@ -49,16 +49,19 @@ class StoragePlugin(Plugin):
         pass
 
     @abstractmethod
-    def retrieve(self, id: str, mode: str) -> dict:
+    def retrieve(
+        self, id: str, mode: str = "r"
+    ) -> list[tuple[str, Union[Callable[[], Union[TextIO, BinaryIO]]], dict]]:
         pass
 
     @abstractmethod
     def retrieve_stream(
         self,
-        id: str,
-        mode: str = "w",
-    ) -> dict:
+        selector: list,
+        mode: str = "r",
+    ) -> list[tuple[str, Union[Callable[[], Union[TextIO, BinaryIO]]], dict]]:
         pass
+
 
 class IndexerPlugin(Plugin):
     """Implement to trigger the indexing of the WARC files for a replay engine."""
