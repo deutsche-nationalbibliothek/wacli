@@ -1,7 +1,7 @@
-from httpx import Response
-from loguru import logger
 from textwrap import dedent
+
 import pytest
+from httpx import Response
 
 from wacli.plugin_manager import PluginManager
 
@@ -15,10 +15,11 @@ def get_plugin_config(path):
             {
                 "module": "wacli_plugins.storage.aras",
                 "rest_base": aras_rest_base_url,
-                "repo": aras_repository
+                "repo": aras_repository,
             }
         ]
     }
+
 
 @pytest.mark.respx(base_url=aras_rest_base_url)
 def test_retrieve_stream(respx_mock, tmp_path):
@@ -49,7 +50,9 @@ def test_retrieve_stream(respx_mock, tmp_path):
     ]
 
     # /access/repositories/example_warc/artifacts/1234567890/objects
-    respx_mock.get(f"/access/repositories/{aras_repository}/artifacts/{idn}/objects").mock(
+    respx_mock.get(
+        f"/access/repositories/{aras_repository}/artifacts/{idn}/objects"
+    ).mock(
         return_value=Response(
             200,
             text=dedent(f"""
@@ -76,12 +79,12 @@ def test_retrieve_stream(respx_mock, tmp_path):
         )
     )
 
-    respx_mock.get(f"/access/repositories/{aras_repository}/artifacts/{idn}/objects/0").mock(
-        return_value=Response(200, text=example_content_0)
-    )
-    respx_mock.get(f"/access/repositories/{aras_repository}/artifacts/{idn}/objects/1").mock(
-        return_value=Response(200, text=example_content_1)
-    )
+    respx_mock.get(
+        f"/access/repositories/{aras_repository}/artifacts/{idn}/objects/0"
+    ).mock(return_value=Response(200, text=example_content_0))
+    respx_mock.get(
+        f"/access/repositories/{aras_repository}/artifacts/{idn}/objects/1"
+    ).mock(return_value=Response(200, text=example_content_1))
 
     plugin_manager = PluginManager()
     plugin_manager.register_plugins(get_plugin_config(tmp_path))
