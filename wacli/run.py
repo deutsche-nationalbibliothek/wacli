@@ -85,7 +85,7 @@ def load_warcs(ctx):
     source_repository = ctx.obj["plugin_manager"].get("source_repository")
     local_repository = ctx.obj["plugin_manager"].get("local_repository")
 
-    local_repository.store(source_repository.retrieve(catalog.list()))
+    local_repository.store_stream(source_repository.retrieve_stream(catalog.list()))
 
 
 @cli.command()
