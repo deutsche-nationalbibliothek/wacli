@@ -16,39 +16,6 @@ def get_plugin_config(path):
     }
 
 
-def test_store_string(tmp_path):
-    plugin_manager = PluginManager()
-    plugin_manager.register_plugins(get_plugin_config(tmp_path))
-
-    test_storage = plugin_manager.get("test_storage")
-    example_file = "example_file.txt"
-    content = "Hallo"
-
-    test_storage.store(example_file, content)
-
-    p = tmp_path / example_file
-    assert p.read_text() == content
-    assert len(list(tmp_path.iterdir())) == 1
-
-
-def test_store_bytes(tmp_path):
-    plugin_manager = PluginManager()
-    plugin_manager.register_plugins(get_plugin_config(tmp_path))
-
-    test_storage = plugin_manager.get("test_storage")
-    example_file = "example_file.txt"
-
-    content = "Hallo binary"
-    binary_content = content.encode("utf-8")
-    logger.debug(binary_content)
-
-    test_storage.store(example_file, binary_content)
-
-    p = tmp_path / example_file
-    assert p.read_text() == content
-    assert len(list(tmp_path.iterdir())) == 1
-
-
 def test_store_text_io(tmp_path):
     plugin_manager = PluginManager()
     plugin_manager.register_plugins(get_plugin_config(tmp_path))
@@ -58,7 +25,7 @@ def test_store_text_io(tmp_path):
     content = "some initial text data"
     stream = StringIO(content)
 
-    test_storage.store(example_file, stream)
+    test_storage.store(example_file, lambda: stream)
 
     p = tmp_path / example_file
     assert p.read_text() == content
@@ -75,7 +42,7 @@ def test_store_binary_io(tmp_path):
     binary_content = content.encode("utf-8")
     stream = BytesIO(binary_content)
 
-    test_storage.store(example_file, stream)
+    test_storage.store(example_file, lambda: stream)
 
     p = tmp_path / example_file
     assert p.read_text() == content
@@ -90,7 +57,7 @@ def test_get_stream_text_io(tmp_path):
     example_file = "example_file.txt"
     content = "Hallo"
 
-    with test_storage.get_stream(example_file) as stream:
+    with test_storage.retrieve(example_file, mode="w")[0]() as stream:
         stream.write(content)
 
     p = tmp_path / example_file
@@ -109,7 +76,7 @@ def test_get_stream_binary_io(tmp_path):
     binary_content = content.encode("utf-8")
     logger.debug(binary_content)
 
-    with test_storage.get_stream(example_file, mode="wb") as stream:
+    with test_storage.retrieve(example_file, mode="wb")[0]() as stream:
         stream.write(binary_content)
 
     p = tmp_path / example_file
@@ -129,6 +96,7 @@ def test_retrieve_str(tmp_path):
     with open(p, "w") as fp:
         fp.write(content)
 
-    result_content = test_storage.retrieve(example_file)
+    result_content, _ = test_storage.retrieve(example_file)
 
-    assert result_content == content
+    with result_content() as result_data:
+        assert result_data.read() == content
