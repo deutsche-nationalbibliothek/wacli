@@ -90,7 +90,7 @@ def test_retrieve_stream(respx_mock, tmp_path):
     plugin_manager.register_plugins(get_plugin_config(tmp_path))
 
     test_storage = plugin_manager.get("test_storage")
-    archive_stream = test_storage.retrieve_stream([1234567890])
+    archive_stream = test_storage.retrieve_stream([idn])
     for idn, container, _ in archive_stream:
         name, stream, metadata = next(container)
         with stream() as bytes_io:
