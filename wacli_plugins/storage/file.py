@@ -4,7 +4,7 @@ from os.path import basename, dirname
 from pathlib import Path
 from typing import BinaryIO, TextIO, Union
 
-from wacli_plugins.plugin_types.directory import DirectoryStorage
+from .directory import DirectoryStorage
 
 
 class FileStorage(DirectoryStorage):
@@ -15,25 +15,20 @@ class FileStorage(DirectoryStorage):
         self.path = Path(dirname(path))
         self.id = Path(basename(path))
 
-    def get_stream(
-        self,
-        selector: list,
-        mode: str = "w",
-    ):
-        with super(FileStorage, self).get_stream(
-            selector=[self.id], mode=mode
-        ) as parent:
-            return parent
-
     def store(
         self,
         id: str,
-        data: Union[TextIO, BinaryIO, None] = None,
-        mode: str = "w",
+        data: Union[TextIO, BinaryIO],
+        metadata={},
     ):
         """Create a file with the given id as name in the directory."""
 
-        return super(FileStorage, self).store(id=self.id, data=data, mode=mode)
+        return super(FileStorage, self).store(id=self.id, data=data, metadata=metadata)
+
+    def store_stream(self, stream: list):
+        super(FileStorage, self).store_stream(
+            [(self.id, data, metadata) for _, data, metadata in stream]
+        )
 
     def retrieve(
         self,
@@ -41,6 +36,13 @@ class FileStorage(DirectoryStorage):
         mode: str = "r",
     ):
         return super(FileStorage, self).retrieve(id=self.id, mode=mode)
+
+    def retrieve_stream(
+        self,
+        selector: list,
+        mode: str = "w",
+    ):
+        return super(FileStorage, self).retrieve_stream(selector=[self.id], mode=mode)
 
 
 export = FileStorage
