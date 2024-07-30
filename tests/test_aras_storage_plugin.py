@@ -6,6 +6,7 @@ import pytest
 from wacli.plugin_manager import PluginManager
 
 aras_rest_base_url = "http://dnb-test-aras/"
+aras_repository = "example_warc"
 
 
 def get_plugin_config(path):
@@ -13,14 +14,14 @@ def get_plugin_config(path):
         "test_storage": [
             {
                 "module": "wacli_plugins.storage.aras",
-                "rest_base": aras_rest_base_url
+                "rest_base": aras_rest_base_url,
+                "repo": aras_repository
             }
         ]
     }
 
 @pytest.mark.respx(base_url=aras_rest_base_url)
 def test_retrieve_stream(respx_mock, tmp_path):
-    repository = "example_warc"
     idn = "1234567890"
 
     example_content_0 = "One example WARC content"
@@ -48,7 +49,7 @@ def test_retrieve_stream(respx_mock, tmp_path):
     ]
 
     # /access/repositories/example_warc/artifacts/1234567890/objects
-    respx_mock.get(f"/access/repositories/{repository}/artifacts/{idn}/objects").mock(
+    respx_mock.get(f"/access/repositories/{aras_repository}/artifacts/{idn}/objects").mock(
         return_value=Response(
             200,
             text=dedent(f"""
@@ -75,10 +76,10 @@ def test_retrieve_stream(respx_mock, tmp_path):
         )
     )
 
-    respx_mock.get(f"/access/repositories/{repository}/artifacts/{idn}/objects/0").mock(
+    respx_mock.get(f"/access/repositories/{aras_repository}/artifacts/{idn}/objects/0").mock(
         return_value=Response(200, text=example_content_0)
     )
-    respx_mock.get(f"/access/repositories/{repository}/artifacts/{idn}/objects/1").mock(
+    respx_mock.get(f"/access/repositories/{aras_repository}/artifacts/{idn}/objects/1").mock(
         return_value=Response(200, text=example_content_1)
     )
 
