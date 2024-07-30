@@ -15,12 +15,10 @@ class ArasStorage(StoragePlugin):
         raise Exception("ArasStorage is read only")
 
     def retrieve(self, id, mode: str = "rb") -> list:
-        if mode not in ["rb"]:
-            raise Exception("Only 'rb' mode is supported.")
-        for name, stream, metadata in aras_get_stream(
-            self.rest_base, self.repository, id
-        ):
-            yield name, stream, metadata
+        raise Exception(
+            "ArasStorage always organzies WARCs in folders of IDNs, "
+            + "use retrieve_stream instead"
+        )
 
     def retrieve_stream(self, selector, mode="rb") -> list:
         if mode not in ["rb"]:
@@ -28,7 +26,7 @@ class ArasStorage(StoragePlugin):
         if selector is None:
             raise Exception("ArasStorage needs a list of explicite IDNs")
         for idn in selector:
-            yield idn, self.retrieve(idn, mode), {}
+            yield idn, aras_get_stream(self.rest_base, self.repository, idn), {}
 
 
 export = ArasStorage
