@@ -89,7 +89,7 @@ class GraphCatalog(CatalogPlugin):
               bind(SUBSTR(str(?identifier), 9) as ?idn)
             }
         """)
-        _, graph_file_io, _ = next(self.storage_backend.retrieve("graph_file.ttl", "w"))
+        graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl", "w")
         website_graph = local_result.graph
         website_graph.namespace_manager = self.namespaces
         website_graph.serialize(graph_file_io(), format="turtle")
@@ -97,7 +97,7 @@ class GraphCatalog(CatalogPlugin):
     def list(self) -> list:
         """List available web archive entries by IDN."""
         website_graph = Graph()
-        _, graph_file_io, _ = next(self.storage_backend.retrieve("graph_file.ttl"))
+        graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl")
         # with self.storage_backend.get_stream("graph_file.ttl", mode="r") as graph_file:
         website_graph.parse(source=graph_file_io())
         website_graph.namespace_manager = self.namespaces
