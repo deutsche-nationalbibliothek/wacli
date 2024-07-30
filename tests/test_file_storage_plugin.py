@@ -15,6 +15,7 @@ def get_plugin_config(path):
         ]
     }
 
+
 def test_store_text_io(tmp_path):
     plugin_manager = PluginManager()
     p = tmp_path / "example_file.txt"
