@@ -23,13 +23,15 @@ class DirectoryStorage(StoragePlugin):
         metadata: dict = {},
     ):
         """Create a file with the given id as name in the directory."""
+        self._store_data(self.path / id, data, metadata)
 
+    def _store_data(self, path, data, metadata):
         with data() as source_io:
             mode = "w"
             if isinstance(source_io, BytesIO):
                 mode = "wb"
 
-            target, target_metadata = self.retrieve(id, mode)
+            target, target_metadata = self._retrieve(path, mode)
             with target() as target_io:
                 while True:
                     chunk = source_io.read(DEFAULT_BUFFER_SIZE)
@@ -43,9 +45,14 @@ class DirectoryStorage(StoragePlugin):
         stream: list,
     ):
         """Write the stream to the directory."""
+        self._store_stream(self.path, stream)
+
+    def _store_stream(self, path, stream):
         for id, data, metadata in stream:
-            self.store()
-            # self.store(id, data, metadata)
+            if isinstance(data, list):
+                self._store_stream(path / id, data)
+            else:
+                self._store_data(path / id, data, metadata)
 
     def retrieve(
         self,
@@ -54,8 +61,10 @@ class DirectoryStorage(StoragePlugin):
     ) -> tuple[Callable[[], Union[TextIO, BinaryIO]], dict]:
         if mode not in ["r", "w", "rb", "wb"]:
             raise Exception("Only 'r', 'w', 'rb', and 'wb' modes are supported.")
+        return self._retrieve(self.path / id, mode)
 
-        return lambda: open(self.path / id, mode), {}
+    def _retrieve(self, path, mode):
+        return lambda: open(path, mode), {}
 
     def retrieve_stream(
         self,
@@ -70,12 +79,12 @@ class DirectoryStorage(StoragePlugin):
         if not selector:
             raise Exception("DirectoryStorage needs a list of explicite IDs")
 
-        return self._retrieve(self.path, selector, mode)
+        return self._retrieve_stream(self.path, selector, mode)
 
     def list(self) -> list:
         return [d for d in listdir(self.path) if isdir(self.path / d)]
 
-    def _retrieve(
+    def _retrieve_stream(
         self,
         path,
         selector,
@@ -87,9 +96,9 @@ class DirectoryStorage(StoragePlugin):
 
         for id in selector:
             if not exists(path / id) or isfile(path / id):
-                yield id, lambda: open(path / id, mode), {}
+                yield id, self._retrieve(path / id, mode), {}
             else:
-                yield id, self._retrieve(path / id, listdir(path / id), mode), {}
+                yield id, self._retrieve_stream(path / id, listdir(path / id), mode), {}
 
     def list(self) -> list:
         return [d for d in listdir(self.path) if isdir(self.path / d)]
