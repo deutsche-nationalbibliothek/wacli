@@ -30,8 +30,8 @@ class StoragePlugin(Plugin):
     def store(
         self,
         id: str,
-        data: Union[Callable[[], Union[TextIO, BinaryIO]]],
-        metadata={},
+        data: Callable[[], Union[TextIO, BinaryIO]],
+        metadata: dict = {},
     ):
         """Store the data at the given id in the storage.
         If data is None, a writable IO-like object is returned.
@@ -41,7 +41,7 @@ class StoragePlugin(Plugin):
     @abstractmethod
     def store_stream(
         self,
-        stream: list[tuple[str, Union[Callable[[], Union[TextIO, BinaryIO]]], dict]],
+        stream: list[tuple[str, Callable[[], Union[TextIO, BinaryIO]], dict]],
     ):
         """Store the data at the given id in the storage.
         If data is None, a writable IO-like object is returned.
@@ -51,7 +51,7 @@ class StoragePlugin(Plugin):
     @abstractmethod
     def retrieve(
         self, id: str, mode: str = "r"
-    ) -> list[tuple[str, Union[Callable[[], Union[TextIO, BinaryIO]]], dict]]:
+    ) -> list[tuple[str, Callable[[], Union[TextIO, BinaryIO]], dict]]:
         pass
 
     @abstractmethod
@@ -59,7 +59,7 @@ class StoragePlugin(Plugin):
         self,
         selector: list,
         mode: str = "r",
-    ) -> list[tuple[str, Union[Callable[[], Union[TextIO, BinaryIO]]], dict]]:
+    ) -> list[tuple[str, Callable[[], Union[TextIO, BinaryIO]], dict]]:
         pass
 
 
