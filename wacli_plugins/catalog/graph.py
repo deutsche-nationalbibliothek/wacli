@@ -98,7 +98,6 @@ class GraphCatalog(CatalogPlugin):
         """List available web archive entries by IDN."""
         website_graph = Graph()
         graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl")
-        # with self.storage_backend.get_stream("graph_file.ttl", mode="r") as graph_file:
         website_graph.parse(source=graph_file_io())
         website_graph.namespace_manager = self.namespaces
         idn_result = website_graph.query("""
