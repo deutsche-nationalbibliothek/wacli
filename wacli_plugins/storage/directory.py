@@ -39,7 +39,6 @@ class DirectoryStorage(StoragePlugin):
                 source_io.wacli_read = source_io.read
                 while chunk := source_io.wacli_read(DEFAULT_BUFFER_SIZE):
                     try:
-                        logger.debug("write")
                         target_io.write(chunk)
                     except TypeError:
                         logger.debug("overwrite source_io.wacli_read")
@@ -58,7 +57,6 @@ class DirectoryStorage(StoragePlugin):
 
     def _store_stream(self, path, stream):
         for id, data, metadata in stream:
-            logger.debug(f"data is of type: {type(data)}")
             if isinstance(data, Callable):
                 self._store_data(path / id, data, metadata)
             else:
