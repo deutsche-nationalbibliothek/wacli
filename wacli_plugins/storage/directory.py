@@ -46,7 +46,6 @@ class DirectoryStorage(StoragePlugin):
                         source_io.wacli_read = lambda buffer_size: source_io.read(
                             buffer_size
                         ).encode("utf-8")
-                # raise Exception()
 
     def store_stream(
         self,
