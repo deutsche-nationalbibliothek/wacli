@@ -1,9 +1,6 @@
 from abc import abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass, field
-from typing import BinaryIO, Self, TextIO, Union
-
-from uuid6 import uuid7
+from typing import IO, Union
 
 from .plugin_manager import Plugin
 
@@ -30,7 +27,7 @@ class StoragePlugin(Plugin):
     def store(
         self,
         id: str,
-        data: Callable[[], Union[TextIO, BinaryIO]],
+        data: Callable[[], IO],
         metadata: dict = {},
     ):
         """Store the data at the given id in the storage.
@@ -41,7 +38,7 @@ class StoragePlugin(Plugin):
     @abstractmethod
     def store_stream(
         self,
-        stream: list[tuple[str, Callable[[], Union[TextIO, BinaryIO]], dict]],
+        stream: list[tuple[str, Union[list[tuple], Callable[[], IO]], dict]],
     ):
         """Store the data at the given id in the storage.
         If data is None, a writable IO-like object is returned.
@@ -49,9 +46,7 @@ class StoragePlugin(Plugin):
         pass
 
     @abstractmethod
-    def retrieve(
-        self, id: str, mode: str = "r"
-    ) -> tuple[Callable[[], Union[TextIO, BinaryIO]], dict]:
+    def retrieve(self, id: str, mode: str = "r") -> tuple[Callable[[], IO], dict]:
         pass
 
     @abstractmethod
@@ -59,7 +54,7 @@ class StoragePlugin(Plugin):
         self,
         selector: list,
         mode: str = "r",
-    ) -> list[tuple[str, Callable[[], Union[TextIO, BinaryIO]], dict]]:
+    ) -> list[tuple[str, Union[list[tuple], Callable[[], IO]], dict]]:
         pass
 
 
@@ -69,33 +64,3 @@ class IndexerPlugin(Plugin):
     @abstractmethod
     def index(self, warc):
         pass
-
-
-@dataclass
-class StorageStream:
-    root: dict[str, Union[Self, TextIO, BinaryIO]] = field(
-        default_factory=dict[str, Union[Self, TextIO, BinaryIO]]
-    )
-
-    def __iter__(self):
-        return iter(self.root.values())
-
-    def __setitem__(self, key: str, item: Union[Self, TextIO, BinaryIO]):
-        self.root[key] = item
-
-    def __getitem__(self, key: str) -> Union[Self, TextIO, BinaryIO]:
-        return self.root[key]
-
-    def append(self, item: Union[Self, TextIO, BinaryIO]) -> str:
-        key = uuid7()
-        self.root[key] = item
-        return key
-
-    def keys(self) -> list[str]:
-        return self.root.keys()
-
-    def values(self) -> list[Union[Self, TextIO, BinaryIO]]:
-        return self.root.values()
-
-    def items(self) -> tuple[str, Union[Self, TextIO, BinaryIO]]:
-        return self.root.items()
