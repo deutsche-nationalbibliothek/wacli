@@ -135,7 +135,7 @@ def test_store_stream(tmp_path):
 
     storage_stream = [
         (example_text_file, lambda: text_stream, {}),
-        (example_binary_file, lambda: binary_stream, {})
+        (example_binary_file, lambda: binary_stream, {}),
     ]
 
     test_storage.store_stream(storage_stream)
