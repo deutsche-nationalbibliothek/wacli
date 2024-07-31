@@ -117,3 +117,31 @@ def test_retrieve_str(tmp_path):
 
     with result_content() as result_data:
         assert result_data.read() == content
+
+
+def test_store_stream(tmp_path):
+    plugin_manager = PluginManager()
+    plugin_manager.register_plugins(get_plugin_config(tmp_path))
+
+    test_storage = plugin_manager.get("test_storage")
+    example_text_file = "example_text_file.txt"
+    text_content = "some initial text data"
+    text_stream = StringIO(text_content)
+
+    example_binary_file = "example_binary_file.txt"
+    binary_content = "some initial binary text data"
+    binary_content_encoded = binary_content.encode("utf-8")
+    binary_stream = BytesIO(binary_content_encoded)
+
+    storage_stream = [
+        (example_text_file, lambda: text_stream, {}),
+        (example_binary_file, lambda: binary_stream, {})
+    ]
+
+    test_storage.store_stream(storage_stream)
+
+    pt = tmp_path / example_text_file
+    assert pt.read_text() == text_content
+    pb = tmp_path / example_binary_file
+    assert pb.read_text() == binary_content
+    assert len(list(tmp_path.iterdir())) == 2
