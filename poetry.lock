@@ -41,7 +41,7 @@ to-file-like-obj = "^0.0.6"
 type = "git"
 url = "https://gitlab.prod.jason.dnb.de/Arndtn/aras-py.git"
 reference = "HEAD"
-resolved_reference = "2c492c68e21bf225074739e011fb8e70997daa2b"
+resolved_reference = "de229fded48378b88181ea9fbcd1d602e435c2f4"
 
 [[package]]
 name = "certifi"
@@ -476,7 +476,7 @@ orjson = ["orjson (>=3.9.14,<4)"]
 type = "git"
 url = "https://github.com/white-gecko/rdflib"
 reference = "feature/sparql_result_parsing"
-resolved_reference = "f0474fe7345686968b6d4a51741b62f3140e8d86"
+resolved_reference = "3a93c01f5fc6119c3a0a62dbe22dd263794b66ec"
 
 [[package]]
 name = "respx"
