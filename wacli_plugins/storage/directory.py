@@ -23,18 +23,27 @@ class DirectoryStorage(StoragePlugin):
         id: str,
         data: Callable[[], IO],
         metadata: dict = {},
+        callback: Callable = None,
     ):
         """Create a file with the given id as name in the directory."""
-        self._store_data(self.path / id, data, metadata)
+        self._store_data(self.path / id, data, metadata, callback)
 
-    def _store_data(self, path, data, metadata):
+    def _store_data(self, path, data, metadata, callback=None):
+        callbacks = []
+        logger.debug(f"source metadata: {metadata}")
+        if source_callback := metadata.get("callback", False):
+            logger.debug("register source_callback")
+            callbacks.append(source_callback)
+
         with data() as source_io:
             if isinstance(source_io, TextIOBase):
                 mode = "w"
             else:
                 mode = getattr(source_io, "mode", "wb")
 
-            target, target_metadata = self._retrieve(path, mode)
+            target, target_metadata = self._retrieve(path, mode, callback)
+            if target_callback := target_metadata.get("callback", False):
+                callbacks.append(target_callback)
             with target() as target_io:
                 source_io.wacli_read = source_io.read
                 while chunk := source_io.wacli_read(DEFAULT_BUFFER_SIZE):
@@ -46,39 +55,42 @@ class DirectoryStorage(StoragePlugin):
                         source_io.wacli_read = lambda buffer_size: source_io.read(
                             buffer_size
                         ).encode("utf-8")
+                    for callback in callbacks:
+                        callback(
+                            advance=DEFAULT_BUFFER_SIZE,
+                            total=metadata["size"],
+                            name=path,
+                        )
 
     def store_stream(
         self,
         stream: list[tuple[str, Union[list[tuple], Callable[[], IO]], dict]],
+        callback: Callable = None,
     ):
         """Write the stream to the directory."""
-        self._store_stream(self.path, stream)
+        self._store_stream(self.path, stream, callback)
 
-    def _store_stream(self, path, stream):
+    def _store_stream(self, path, stream, callback: Callable):
         for id, data, metadata in stream:
             if isinstance(data, Callable):
-                self._store_data(path / id, data, metadata)
+                self._store_data(path / id, data, metadata, callback)
             else:
-                self._store_stream(path / id, data)
+                self._store_stream(path / id, data, callback)
 
     def retrieve(
-        self,
-        id: str,
-        mode: str = "r",
+        self, id: str, mode: str = "r", callback: Callable = None
     ) -> tuple[Callable[[], IO], dict]:
         if mode not in ["r", "w", "rb", "wb"]:
             raise Exception("Only 'r', 'w', 'rb', and 'wb' modes are supported.")
-        return self._retrieve(self.path / id, mode)
+        return self._retrieve(self.path / id, mode, callback)
 
-    def _retrieve(self, path, mode):
+    def _retrieve(self, path, mode, callback):
         if "w" in mode:
             path.parent.mkdir(parents=True, exist_ok=True)
-        return lambda: open(path, mode), {}
+        return lambda: open(path, mode), {"callback": callback}
 
     def retrieve_stream(
-        self,
-        selector,
-        mode: str = "r",
+        self, selector, mode: str = "r", callback: Callable = None
     ) -> list[tuple[str, Union[list[tuple], Callable[[], IO]], dict]]:
         """Create a file with the given id as name in the directory."""
 
@@ -88,16 +100,10 @@ class DirectoryStorage(StoragePlugin):
         if not selector:
             raise Exception("DirectoryStorage needs a list of explicite IDs")
 
-        return self._retrieve_stream(self.path, selector, mode)
-
-    def list(self) -> list:
-        return [d for d in listdir(self.path) if isdir(self.path / d)]
+        return self._retrieve_stream(self.path, selector, mode, callback)
 
     def _retrieve_stream(
-        self,
-        path,
-        selector,
-        mode: str = "r",
+        self, path, selector, mode: str = "r", callback: Callable = None
     ):
         #  -> list[tuple[str, Union[TextIO, BinaryIO, Callable], dict]]
         if mode not in ["r", "w", "rb", "wb"]:
@@ -105,9 +111,15 @@ class DirectoryStorage(StoragePlugin):
 
         for id in selector:
             if not exists(path / id) or isfile(path / id):
-                yield id, self._retrieve(path / id, mode), {}
+                yield id, self._retrieve(path / id, mode), {"callback": callback}
             else:
-                yield id, self._retrieve_stream(path / id, listdir(path / id), mode), {}
+                yield (
+                    id,
+                    self._retrieve_stream(
+                        path / id, listdir(path / id), mode, callback
+                    ),
+                    {},
+                )
 
     def list(self) -> list:
         return [d for d in listdir(self.path) if isdir(self.path / d)]

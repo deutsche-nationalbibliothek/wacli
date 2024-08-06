@@ -1,5 +1,6 @@
 import click
 from loguru import logger
+from rich.progress import Progress
 
 from .plugin_manager import PluginManager
 
@@ -85,7 +86,35 @@ def load_warcs(ctx):
     source_repository = ctx.obj["plugin_manager"].get("source_repository")
     local_repository = ctx.obj["plugin_manager"].get("local_repository")
 
-    local_repository.store_stream(source_repository.retrieve_stream(catalog.list()))
+    with Progress() as progress:
+        tasks = {}
+
+        def get_task(name):
+            if name not in tasks:
+                tasks[name] = progress.add_task(
+                    "[bright_black]Downloading...",
+                    total=None,
+                )
+            return tasks.get(name)
+
+        def callback_factory(description, id_prefix=None):
+            def callback(advance, total, name):
+                progress.update(
+                    get_task(id_prefix + str(name)),
+                    description=f"{description} {name}...",
+                    advance=advance,
+                    total=total,
+                )
+
+            return callback
+
+        target_callback = callback_factory("[blue]Storing", id_prefix="target")
+        source_callback = callback_factory("[blue]Downloading", id_prefix="source")
+
+        local_repository.store_stream(
+            source_repository.retrieve_stream(catalog.list(), callback=source_callback),
+            callback=target_callback,
+        )
 
 
 @cli.command()
