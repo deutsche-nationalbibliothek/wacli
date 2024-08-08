@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 from io import DEFAULT_BUFFER_SIZE, TextIOBase
-from os import listdir
+from os import listdir, walk
 from os.path import exists, isdir, isfile
 from pathlib import Path
 from typing import IO, Union
@@ -123,6 +123,13 @@ class DirectoryStorage(StoragePlugin):
 
     def list(self) -> list:
         return [d for d in listdir(self.path) if isdir(self.path / d)]
+
+    def list_files(self, filter_fn=None) -> list:
+        for subdir, dirs, files in walk(self.path):
+            subdir_p = Path(subdir)
+            files = filter(filter_fn, files) if filter_fn else files
+            for file in files:
+                yield subdir_p / file
 
 
 export = DirectoryStorage
