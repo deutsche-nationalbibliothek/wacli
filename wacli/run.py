@@ -12,7 +12,8 @@ from .plugin_manager import PluginManager
 @click.option("--aras-rest-base", envvar="ARAS_REST_BASE", default=None)
 @click.option("--aras-repo", envvar="ARAS_REPO", default=None)
 @click.option("--warc-dir", "--warc-directory", envvar="WARC_DIRECTORY", default=None)
-def cli(ctx, endpoint, graph_file, aras_rest_base, aras_repo, warc_dir):
+@click.option("--pywb-dir", "--pywb-directory", envvar="PYWB_DIRECTORY", default=None)
+def cli(ctx, endpoint, graph_file, aras_rest_base, aras_repo, warc_dir, pywb_dir):
     ctx.ensure_object(dict)
     ctx.obj["plugin_manager"] = PluginManager()
     plugin_configuration = {
@@ -43,7 +44,12 @@ def cli(ctx, endpoint, graph_file, aras_rest_base, aras_repo, warc_dir):
             }
         ],
         "indexers": [
-            {"module": "wacli_plugins.indexer.pywb"},
+            {
+                "module": "wacli_plugins.indexer.pywb",
+                "collection": "dnb",
+                "pywb_path": pywb_dir,
+                "warc_path": warc_dir,
+            },
             {"module": "wacli_plugins.indexer.solrwayback"},
         ],
     }
@@ -123,6 +129,7 @@ def index_warcs(ctx):
     local_repository = ctx.obj["plugin_manager"].get("local_repository")
     indexers = ctx.obj["plugin_manager"].get_all("indexers")
 
-    warc_list = local_repository.list()
+    warc_list = local_repository.list_files()
+    logger.debug(warc_list)
     for indexer in indexers:
         indexer.index(warc_list)
