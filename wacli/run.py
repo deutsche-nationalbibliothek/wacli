@@ -76,9 +76,9 @@ def load_graph(ctx):
     catalog.initialize()
 
 
-@cli.command()
+@cli.command("list")
 @click.pass_context
-def list(ctx):
+def list_cmd(ctx):
     # WebGraph().list(graph_file)
     catalog = ctx.obj["plugin_manager"].get("catalog")
     for idn in catalog.list():
