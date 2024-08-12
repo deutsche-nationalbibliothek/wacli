@@ -1,3 +1,5 @@
+from itertools import tee
+
 import click
 from loguru import logger
 from rich.progress import Progress
@@ -127,12 +129,14 @@ def load_warcs(ctx):
 @click.pass_context
 def index_warcs(ctx):
     local_repository = ctx.obj["plugin_manager"].get("local_repository")
-    indexers = ctx.obj["plugin_manager"].get_all("indexers")
+    indexers = list(ctx.obj["plugin_manager"].get_all("indexers"))
+    logger.debug(indexers)
 
     warc_list = local_repository.list_files()
     logger.debug(warc_list)
+    warc_lists = iter(tee(warc_list, len(indexers)))
     for indexer in indexers:
-        indexer.index(warc_list)
+        indexer.index(next(warc_lists))
 
 
 @cli.command()
