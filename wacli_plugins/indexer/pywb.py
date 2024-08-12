@@ -17,16 +17,35 @@ class PyWbPlugin(IndexerPlugin):
         self.pywb_path = configuration.get("pywb_path")
         self.warc_path = configuration.get("warc_path")
 
-    def index(self, warc_list):
+    def index(self, warc_list, clean: bool = True, block: bool = False):
+        """Add the warc files to the pywb index.
+        Clean tells, if the containers should be removed, when they are finished.
+        Block tells if the index command will wait for all containers to finish befor
+        returning. It will also output the logs of the containers.
+        """
+        containers = []
         for warc in warc_list:
             warc = self.rebase(
                 Path(warc),
                 base=Path(self.warc_path),
                 to=Path(self.container_path_source),
             )
-            self.index_warc(warc)
+            proc = self.index_warc(warc, clean and not block)
+            containers.append(proc)
+        if block:
+            for proc in containers:
+                while proc.status in ["created", "running"]:
+                    proc.reload()
+                    logger.debug(proc)
+                    logger.debug(proc.status)
+                    continue
+            for proc in containers:
+                logger.debug(proc)
+                logger.debug(proc.logs())
+                if clean:
+                    proc.remove()
 
-    def index_warc(self, warc):
+    def index_warc(self, warc, clean: bool = True):
         env = {"INIT_COLLECTION": self.collection}
         args = ["wb-manager", "add", self.collection, str(warc)]
         mounts = [
@@ -45,14 +64,15 @@ class PyWbPlugin(IndexerPlugin):
         client = docker_from_env()
 
         container = client.containers.run(
-            image="webrecorder/pywb",
+            image="docker.io/webrecorder/pywb",
             command=args,
             environment=env,
             mounts=mounts,
             detach=True,
-            auto_remove=True,
+            auto_remove=clean,
         )
         logger.debug(container)
+        return container
 
     def rebase(self, warc, base, to):
         return to / warc.relative_to(base)
