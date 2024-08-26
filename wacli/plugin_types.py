@@ -1,8 +1,13 @@
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import IO, Union
+from typing import IO, TypeAlias, Union
 
 from .plugin_manager import Plugin
+
+StorageStream: TypeAlias = list[
+    tuple[str, Union["StorageStream", Callable[[], IO]], dict]
+]
+StoreItem: TypeAlias = tuple[Callable[[], IO], dict]
 
 
 class CatalogPlugin(Plugin):
@@ -21,7 +26,10 @@ class CatalogPlugin(Plugin):
 
 
 class StoragePlugin(Plugin):
-    """Implement the storage and retrieval of WARC files."""
+    """Implement the storage and retrieval of WARC files.
+    The storage steam is:
+    storage_stream: list[tuple[str, Union[storage_stream, Callable[[], IO]], dict]]
+    """
 
     @abstractmethod
     def store(
@@ -39,7 +47,7 @@ class StoragePlugin(Plugin):
     @abstractmethod
     def store_stream(
         self,
-        stream: list[tuple[str, Union[list[tuple], Callable[[], IO]], dict]],
+        stream: StorageStream,
         callback: Callable = None,
     ):
         """Store the data at the given id in the storage.
@@ -50,13 +58,13 @@ class StoragePlugin(Plugin):
     @abstractmethod
     def retrieve(
         self, id: str, mode: str = "r", callback: Callable = None
-    ) -> tuple[Callable[[], IO], dict]:
+    ) -> StoreItem:
         pass
 
     @abstractmethod
     def retrieve_stream(
         self, selector: list, mode: str = "r", callback: Callable = None
-    ) -> list[tuple[str, Union[list[tuple], Callable[[], IO]], dict]]:
+    ) -> StorageStream:
         pass
 
 

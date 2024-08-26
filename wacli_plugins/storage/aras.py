@@ -2,7 +2,7 @@ from collections.abc import Callable
 
 from aras_py.run import get_stream as aras_get_stream
 
-from wacli.plugin_types import StoragePlugin
+from wacli.plugin_types import StoragePlugin, StorageStream, StoreItem
 
 
 class ArasStorage(StoragePlugin):
@@ -13,16 +13,18 @@ class ArasStorage(StoragePlugin):
     def store(self, id, data, metadata, callback: Callable = None):
         raise Exception("ArasStorage is read only")
 
-    def store_stream(self, stream, callback: Callable = None):
+    def store_stream(self, stream: StorageStream, callback: Callable = None):
         raise Exception("ArasStorage is read only")
 
-    def retrieve(self, id, mode: str = "rb", callback: Callable = None) -> list:
+    def retrieve(self, id, mode: str = "rb", callback: Callable = None) -> StoreItem:
         raise Exception(
             "ArasStorage always organzies WARCs in folders of IDNs, "
             + "use retrieve_stream instead"
         )
 
-    def retrieve_stream(self, selector, mode="rb", callback: Callable = None) -> list:
+    def retrieve_stream(
+        self, selector, mode="rb", callback: Callable = None
+    ) -> StorageStream:
         if mode not in ["rb"]:
             raise Exception("Only 'rb' mode is supported.")
         if selector is None:
