@@ -75,3 +75,11 @@ class IndexerPlugin(Plugin):
     def index(self, warcs: list):
         """Takes a list of paths to WARC files."""
         pass
+
+
+class OperationPlugin(Plugin):
+    """Implement to trigger some operation on the WARC files."""
+
+    @abstractmethod
+    def run(self, stream: StorageStream) -> StorageStream:
+        pass
