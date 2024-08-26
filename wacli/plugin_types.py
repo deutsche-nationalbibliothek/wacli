@@ -72,5 +72,6 @@ class IndexerPlugin(Plugin):
     """Implement to trigger the indexing of the WARC files for a replay engine."""
 
     @abstractmethod
-    def index(self, warc):
+    def index(self, warcs: list):
+        """Takes a list of paths to WARC files."""
         pass

@@ -17,14 +17,14 @@ class PyWbPlugin(IndexerPlugin):
         self.pywb_path = configuration.get("pywb_path")
         self.warc_path = configuration.get("warc_path")
 
-    def index(self, warc_list, clean: bool = True, block: bool = False):
+    def index(self, warcs: list, clean: bool = True, block: bool = False):
         """Add the warc files to the pywb index.
         Clean tells, if the containers should be removed, when they are finished.
         Block tells if the index command will wait for all containers to finish befor
         returning. It will also output the logs of the containers.
         """
         containers = []
-        for warc in warc_list:
+        for warc in warcs:
             warc = self.rebase(
                 Path(warc),
                 base=Path(self.warc_path),
