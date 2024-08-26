@@ -53,6 +53,9 @@ lint.select = [
     "FA", # flake8-future-annotations
 ]
 
+[tool.pytest.ini_options]
+addopts="--cov=wacli --cov=wacli_plugins"
+
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.4.4"
 respx = "^0.21.1"

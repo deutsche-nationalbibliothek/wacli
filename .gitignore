@@ -3,3 +3,4 @@ custom.env
 *.warc.gz
 *.ttl
 !tests/assets/*
+.coverage
