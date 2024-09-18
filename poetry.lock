@@ -887,13 +887,21 @@ version = "1.7.4"
 description = "Streaming WARC (and ARC) IO library"
 optional = false
 python-versions = "*"
-files = [
-    {file = "warcio-1.7.4-py2.py3-none-any.whl", hash = "sha256:ced1a162d76434d56abd81b37ac152821d1a11e1db835ead5d649f58068c2203"},
-    {file = "warcio-1.7.4.tar.gz", hash = "sha256:e1889dad9ecac654de5b0973247f335a55827b1b14a8203772d18c749143ea51"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 six = "*"
+
+[package.extras]
+all = ["brotlipy"]
+testing = ["hookdns", "httpbin (>=0.10.2)", "pytest", "pytest-cov", "requests", "urllib3 (>=1.26.5,<1.26.16)", "wsgiprox"]
+
+[package.source]
+type = "git"
+url = "https://github.com/white-gecko/warcio"
+reference = "feature/streamRecompressor"
+resolved_reference = "d66f177235c2db5f38a3a17d1eecdaf84dec6c41"
 
 [[package]]
 name = "win32-setctime"
@@ -912,4 +920,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "da1c04bab37905408e154ddc5b2f8fba53a5f48cbc6c26b169ccd14d458bd130"
+content-hash = "46fd3db731f76792131b3aa229868a2314b0fb182fb1d64594f0b6a3fc857ab5"
