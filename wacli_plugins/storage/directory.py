@@ -5,11 +5,11 @@ from io import DEFAULT_BUFFER_SIZE, TextIOBase
 from os import listdir, walk
 from os.path import exists, isdir, isfile
 from pathlib import Path
-from typing import IO, Union
+from typing import IO
 
 from loguru import logger
 
-from wacli.plugin_types import StoragePlugin
+from wacli.plugin_types import StoragePlugin, StorageStream, StoreItem
 
 
 class DirectoryStorage(StoragePlugin):
@@ -64,7 +64,7 @@ class DirectoryStorage(StoragePlugin):
 
     def store_stream(
         self,
-        stream: list[tuple[str, Union[list[tuple], Callable[[], IO]], dict]],
+        stream: StorageStream,
         callback: Callable = None,
     ):
         """Write the stream to the directory."""
@@ -79,7 +79,7 @@ class DirectoryStorage(StoragePlugin):
 
     def retrieve(
         self, id: str, mode: str = "r", callback: Callable = None
-    ) -> tuple[Callable[[], IO], dict]:
+    ) -> StoreItem:
         if mode not in ["r", "w", "rb", "wb"]:
             raise Exception("Only 'r', 'w', 'rb', and 'wb' modes are supported.")
         return self._retrieve(self.path / id, mode, callback)
@@ -91,7 +91,7 @@ class DirectoryStorage(StoragePlugin):
 
     def retrieve_stream(
         self, selector, mode: str = "r", callback: Callable = None
-    ) -> list[tuple[str, Union[list[tuple], Callable[[], IO]], dict]]:
+    ) -> StorageStream:
         """Create a file with the given id as name in the directory."""
 
         if mode not in ["r", "w", "rb", "wb"]:
@@ -104,8 +104,7 @@ class DirectoryStorage(StoragePlugin):
 
     def _retrieve_stream(
         self, path, selector, mode: str = "r", callback: Callable = None
-    ):
-        #  -> list[tuple[str, Union[TextIO, BinaryIO, Callable], dict]]
+    ) -> StorageStream:
         if mode not in ["r", "w", "rb", "wb"]:
             raise Exception("Only 'r', 'w', 'rb', and 'wb' modes are supported.")
 
