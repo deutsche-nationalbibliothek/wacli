@@ -66,3 +66,6 @@ def test_recompress_warcs(tmp_path):
             )
         )
     )
+
+    assert "The target fille is currently emtpy" == ""
+    assert False
