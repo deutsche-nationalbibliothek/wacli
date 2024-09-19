@@ -110,7 +110,10 @@ class DirectoryStorage(StoragePlugin):
 
         for id in selector:
             if not exists(path / id) or isfile(path / id):
-                yield id, self._retrieve(path / id, mode), {"callback": callback}
+                yield (
+                    id,
+                    *self._retrieve(path / id, mode, callback),
+                )
             else:
                 yield (
                     id,
