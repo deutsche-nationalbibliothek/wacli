@@ -4,6 +4,7 @@ from io import BytesIO
 from warcio.recompressor import StreamRecompressor
 
 from wacli.plugin_types import OperationPlugin, StorageStream
+from contextlib import contextmanager
 
 
 class RecompressPlugin(OperationPlugin):
@@ -23,6 +24,7 @@ class RecompressPlugin(OperationPlugin):
                 yield id, self._iterate_stream(data), metadata
 
     def _recompress(self, id, data, metadata):
+        @contextmanager
         def data_callback():
             with data() as source_io:
                 target_io = BytesIO()
@@ -31,6 +33,7 @@ class RecompressPlugin(OperationPlugin):
                     _recompressor.decompress_recompress()
                 else:
                     _recompressor.recompress()
+                yield target_io
 
         return id, data_callback, {**metadata, "compression": "application/gzip"}
 

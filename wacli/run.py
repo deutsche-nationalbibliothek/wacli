@@ -14,8 +14,23 @@ from .plugin_manager import PluginManager
 @click.option("--aras-rest-base", envvar="ARAS_REST_BASE", default=None)
 @click.option("--aras-repo", envvar="ARAS_REPO", default=None)
 @click.option("--warc-dir", "--warc-directory", envvar="WARC_DIRECTORY", default=None)
+@click.option(
+    "--warc-dir-clean",
+    "--warc-directory-clean",
+    envvar="WARC_DIRECTORY_CLEAN",
+    default=None,
+)
 @click.option("--pywb-dir", "--pywb-directory", envvar="PYWB_DIRECTORY", default=None)
-def cli(ctx, endpoint, graph_file, aras_rest_base, aras_repo, warc_dir, pywb_dir):
+def cli(
+    ctx,
+    endpoint,
+    graph_file,
+    aras_rest_base,
+    aras_repo,
+    warc_dir,
+    warc_dir_clean,
+    pywb_dir,
+):
     ctx.ensure_object(dict)
     ctx.obj["plugin_manager"] = PluginManager()
     plugin_configuration = {
@@ -45,6 +60,12 @@ def cli(ctx, endpoint, graph_file, aras_rest_base, aras_repo, warc_dir, pywb_dir
                 "path": warc_dir,
             }
         ],
+        "local_recompressed_repository": [
+            {
+                "module": "wacli_plugins.storage.directory",
+                "path": warc_dir_clean,
+            }
+        ],
         "indexers": [
             {
                 "module": "wacli_plugins.indexer.pywb",
@@ -53,6 +74,12 @@ def cli(ctx, endpoint, graph_file, aras_rest_base, aras_repo, warc_dir, pywb_dir
                 "warc_path": warc_dir,
             },
             {"module": "wacli_plugins.indexer.solrwayback"},
+        ],
+        "recompressor": [
+            {
+                "module": "wacli_plugins.operations.recompress",
+                "verbose": True,
+            },
         ],
     }
     ctx.obj["plugin_manager"].register_plugins(plugin_configuration)
@@ -141,6 +168,22 @@ def index_warcs(ctx):
 
 @cli.command()
 @click.pass_context
+def recompress_warcs(ctx):
+    """Recompress warc files"""
+    local_repository = ctx.obj["plugin_manager"].get("local_repository")
+    local_recompressed_repository = ctx.obj["plugin_manager"].get(
+        "local_recompressed_repository"
+    )
+    recompressor = ctx.obj["plugin_manager"].get("recompressor")
+
+    warc_list = local_repository.list()
+    local_recompressed_repository.store_stream(
+        recompressor.run(local_repository.retrieve_stream(warc_list, mode="rb"))
+    )
+
+
+@cli.command()
+@click.pass_context
 def check_warcs(ctx):
     """Check warc files if they are valid"""
     local_repository = ctx.obj["plugin_manager"].get("local_repository")
@@ -149,4 +192,4 @@ def check_warcs(ctx):
 
     warc_list = local_repository.list()
     for checker in checkers:
-        report_storage.store_stream(checker.check(warc_list))
+        report_storage.store_stream(checker.run(warc_list))
