@@ -62,7 +62,7 @@ def test_recompress_warcs(tmp_path):
     output_storage.store_stream(
         debug_out.run(
             test_recompressor.run(
-                debug_in.run(input_storage.retrieve_stream(warc_list))
+                debug_in.run(input_storage.retrieve_stream(warc_list, mode="rb"))
             )
         )
     )
