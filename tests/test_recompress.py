@@ -95,12 +95,6 @@ def test_bytes_io():
 
 def test_bytes_io_stream():
 
-    input = BytesIO()
-    input.write(b"Hi ")
-    input.write(b"Who ")
-    input.write(b"are ")
-    input.write(b"yOu?")
-    input.seek(0)
 
 
     class MyIO(RawIOBase):
@@ -117,23 +111,23 @@ def test_bytes_io_stream():
         def __init__(self, input):
             self.input = input
 
-        def _get_chunk(self):
-            return self.input.read().decode("utf-8").lower().encode("utf-8")
-
-        # def readall(self):
-        #     return self._get_chunk()
-
         def readinto(self, b):
-            chunk = self._get_chunk()
+            chunk = self.input.read().decode("utf-8").lower().encode("utf-8")
             b[:len(chunk)] = chunk
             return len(chunk)
 
-    # buff = MyIO()
+    input = BytesIO()
+    input.write(b"Hi ")
+    input.write(b"Who ")
+    input.write(b"are ")
+    input.write(b"yOu?")
+    input.seek(0)
+
     buff = LazyLower(input)
-
     reader = BufferedReader(buff)
-
     print(reader.read())
+
+    # buff = MyIO()
     # print(buff.read())
 
     assert False
