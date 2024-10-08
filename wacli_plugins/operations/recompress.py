@@ -33,6 +33,7 @@ class RecompressPlugin(OperationPlugin):
                     _recompressor.decompress_recompress()
                 else:
                     _recompressor.recompress()
+                target_io.seek(0)
                 yield target_io
 
         return id, data_callback, {**metadata, "compression": "application/gzip"}

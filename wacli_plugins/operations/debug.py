@@ -6,7 +6,11 @@ from wacli.plugin_types import OperationPlugin, StorageStream
 
 
 class DebugPlugin(OperationPlugin):
-    """Recompress WARC files to the canonical format."""
+    """Debug a WARC stream.
+
+    This operator should be plugged in like any other operator, but it should not alter
+    the stream, but allow introspection and print some information about the stream as
+    it is processed."""
 
     def configure(self, configuration):
         self.log_level = configuration.get("log_level", "DEBUG")

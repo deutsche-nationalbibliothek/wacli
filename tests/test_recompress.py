@@ -67,5 +67,73 @@ def test_recompress_warcs(tmp_path):
         )
     )
 
-    assert "The target fille is currently emtpy" == ""
+    assert "The target file is currently emtpy" == ""
+    assert False
+
+from io import BytesIO, BufferedReader, RawIOBase
+
+def test_bytes_io():
+
+    input = BytesIO()
+    input.write(b"Hi ")
+    input.write(b"Who ")
+    input.write(b"are ")
+    input.write(b"yOu?")
+    input.seek(0)
+
+    buff = BytesIO()
+    while chunk := input.read():
+        buff.write(chunk.decode("utf-8").lower().encode("utf-8"))
+
+    buff.seek(0)
+
+    reader = BufferedReader(buff)
+
+    print(reader.read())
+
+    assert False
+
+def test_bytes_io_stream():
+
+    input = BytesIO()
+    input.write(b"Hi ")
+    input.write(b"Who ")
+    input.write(b"are ")
+    input.write(b"yOu?")
+    input.seek(0)
+
+
+    class MyIO(RawIOBase):
+        def __init__(self):
+            self.i = 4
+        def readinto(self, b):
+            if self.i:
+                self.i -= 1
+                msg = b'hello'
+                b[:len(msg)] = msg
+                return len(msg)
+
+    class LazyLower(RawIOBase):
+        def __init__(self, input):
+            self.input = input
+
+        def _get_chunk(self):
+            return self.input.read().decode("utf-8").lower().encode("utf-8")
+
+        # def readall(self):
+        #     return self._get_chunk()
+
+        def readinto(self, b):
+            chunk = self._get_chunk()
+            b[:len(chunk)] = chunk
+            return len(chunk)
+
+    # buff = MyIO()
+    buff = LazyLower(input)
+
+    reader = BufferedReader(buff)
+
+    print(reader.read())
+    # print(buff.read())
+
     assert False
