@@ -100,6 +100,10 @@ def test_bytes_io_stream():
     class MyIO(RawIOBase):
         def __init__(self):
             self.i = 4
+
+        def readable(self):
+            return True
+
         def readinto(self, b):
             if self.i:
                 self.i -= 1
@@ -110,6 +114,9 @@ def test_bytes_io_stream():
     class LazyLower(RawIOBase):
         def __init__(self, input):
             self.input = input
+
+        def readable(self):
+            return True
 
         def readinto(self, b):
             chunk = self.input.read().decode("utf-8").lower().encode("utf-8")
