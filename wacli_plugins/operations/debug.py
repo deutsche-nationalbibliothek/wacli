@@ -24,10 +24,10 @@ class DebugPlugin(OperationPlugin):
         for id, data, metadata in storage_stream:
             logger.debug(f"{self.prefix}{id}, {self._iterate_stream(data)}, {metadata}")
             if isinstance(data, Callable):
-                logger.debug(f"{self.prefix}🍃 leaf")
+                logger.debug(f"{self.prefix}🍃 leaf ({data})")
                 yield id, data, metadata
             else:
-                logger.debug(f"{self.prefix}↳ descend")
+                logger.debug(f"{self.prefix}↳ descend ({data})")
                 yield id, self._iterate_stream(data), metadata
 
 
