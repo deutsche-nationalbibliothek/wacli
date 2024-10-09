@@ -117,4 +117,4 @@ def test_bytes_io_stream():
     buff = LazyLower(input)
     reader = BufferedReader(buff)
 
-    assert reader.read() == "hi who are you?"
+    assert reader.read() == b"hi who are you?"
