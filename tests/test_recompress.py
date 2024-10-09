@@ -95,22 +95,6 @@ def test_bytes_io():
 
 def test_bytes_io_stream():
 
-
-
-    class MyIO(RawIOBase):
-        def __init__(self):
-            self.i = 4
-
-        def readable(self):
-            return True
-
-        def readinto(self, b):
-            if self.i:
-                self.i -= 1
-                msg = b'hello'
-                b[:len(msg)] = msg
-                return len(msg)
-
     class LazyLower(RawIOBase):
         def __init__(self, input):
             self.input = input
@@ -132,9 +116,5 @@ def test_bytes_io_stream():
 
     buff = LazyLower(input)
     reader = BufferedReader(buff)
-    print(reader.read())
 
-    # buff = MyIO()
-    # print(buff.read())
-
-    assert False
+    assert reader.read() == "hi who are you?"
