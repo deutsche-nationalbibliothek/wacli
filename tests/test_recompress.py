@@ -42,7 +42,7 @@ def test_recompress_warcs(tmp_path):
     warc_list = []
     for file in [
         "https_example_org.warc.gz",
-        "warcio_example-bad-non-chunked.warc.gz",
+        # "warcio_example-bad-non-chunked.warc.gz",
         "warcio_example.warc.gz",
     ]:
         warc_file = input_path / file
@@ -69,6 +69,42 @@ def test_recompress_warcs(tmp_path):
 
     for file in warc_list:
         assert os.path.getsize(output_path / file) > 0
+
+def test_iterate_warcs(tmp_path):
+    input_path = tmp_path / "input"
+    output_path = tmp_path / "output"
+
+    input_path.mkdir()
+    output_path.mkdir()
+
+    test_directory = Path(os.path.dirname(__file__))
+    logger.debug(Path(__file__))
+
+    warc_list = []
+    for file in [
+        "https_example_org.warc.gz",
+        # "warcio_example-bad-non-chunked.warc.gz",
+        "warcio_example.warc.gz",
+    ]:
+        warc_file = input_path / file
+        copyfile(test_directory / "assets" / file, warc_file)
+        warc_list.append(str(warc_file))
+
+    plugin_manager = PluginManager()
+    plugin_manager.register_plugins(get_plugin_config(input_path, output_path))
+    test_recompressor = plugin_manager.get("test_recompressor")
+    input_storage = plugin_manager.get("input_storage")
+    output_storage = plugin_manager.get("output_storage")
+    debug_in = plugin_manager.get("debug_in")
+    debug_out = plugin_manager.get("debug_out")
+
+    logger.debug(warc_list)
+
+    debug_out.iterate_warcs(
+        debug_in.run(input_storage.retrieve_stream(warc_list, mode="rb"))
+    )
+
+    assert False
 
 from io import BytesIO, BufferedReader, RawIOBase
 

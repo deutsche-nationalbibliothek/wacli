@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
 from loguru import logger
+from warcio.archiveiterator import ArchiveIterator
 
 from wacli.plugin_types import OperationPlugin, StorageStream
 
@@ -17,18 +18,30 @@ class DebugPlugin(OperationPlugin):
         self.prefix = configuration.get("prefix")
 
     def run(self, storage_stream: StorageStream) -> StorageStream:
-        return self._iterate_stream(storage_stream)
+        def leaf_callback_print(data):
+            logger.debug(f"{self.prefix}🍃 leaf ({data})")
 
-    def _iterate_stream(self, storage_stream: StorageStream) -> StorageStream:
+        return self._iterate_stream(storage_stream, leaf_callback=leaf_callback_print)
+
+    def iterate_warcs(self, storage_stream: StorageStream) -> StorageStream:
+        def leaf_callback_iterate_warc(data):
+            with data() as stream_in:
+                for record in ArchiveIterator(stream_in, no_record_parse=False, arc2warc=True, verify_http=False):
+                    logger.debug(record.http_headers)
+
+        for id, data, metadata in self._iterate_stream(storage_stream, leaf_callback=leaf_callback_iterate_warc):
+            pass
+
+    def _iterate_stream(self, storage_stream: StorageStream, leaf_callback: Callable) -> StorageStream:
         logger.debug(f"→ {self.prefix}{storage_stream}")
         for id, data, metadata in storage_stream:
-            logger.debug(f"{self.prefix}{id}, {self._iterate_stream(data)}, {metadata}")
+            logger.debug(f"{self.prefix}{id}, {self._iterate_stream(data, leaf_callback=leaf_callback)}, {metadata}")
             if isinstance(data, Callable):
-                logger.debug(f"{self.prefix}🍃 leaf ({data})")
+                leaf_callback(data)
                 yield id, data, metadata
             else:
                 logger.debug(f"{self.prefix}↳ descend ({data})")
-                yield id, self._iterate_stream(data), metadata
+                yield id, self._iterate_stream(data, leaf_callback=leaf_callback), metadata
 
 
 export = DebugPlugin
