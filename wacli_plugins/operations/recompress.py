@@ -1,11 +1,13 @@
 from collections.abc import Callable
 from io import BytesIO
 
-from warcio.recompressor import StreamRecompressor
+from warcio.recompressor import StreamRecompressor, RecompressorStream
 
 from wacli.plugin_types import OperationPlugin, StorageStream
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
+import gzip
 
+from loguru import logger
 
 class RecompressPlugin(OperationPlugin):
     """Recompress WARC files to the canonical format."""
@@ -26,15 +28,11 @@ class RecompressPlugin(OperationPlugin):
     def _recompress(self, id, data, metadata):
         @contextmanager
         def data_callback():
+            logger.info("hi")
             with data() as source_io:
-                target_io = BytesIO()
-                _recompressor = StreamRecompressor(source_io, target_io, self.verbose)
-                if self._is_compressed(id, metadata):
-                    _recompressor.decompress_recompress()
-                else:
-                    _recompressor.recompress()
-                target_io.seek(0)
-                yield target_io
+                # with gzip.open(source_io, "rb") if self._is_compressed(id, metadata) else nullcontext(source_io) as source_stream:
+                logger.debug(f"stream is: {source_io}")
+                yield RecompressorStream(source_io, self.verbose)
 
         return id, data_callback, {**metadata, "compression": "application/gzip"}
 
