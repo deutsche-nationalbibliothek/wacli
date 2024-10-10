@@ -67,8 +67,8 @@ def test_recompress_warcs(tmp_path):
         )
     )
 
-    assert "The target file is currently emtpy" == ""
-    assert False
+    for file in warc_list:
+        assert os.path.getsize(output_path / file) > 0
 
 from io import BytesIO, BufferedReader, RawIOBase
 
@@ -89,9 +89,8 @@ def test_bytes_io():
 
     reader = BufferedReader(buff)
 
-    print(reader.read())
+    assert reader.read() == b"hi who are you?"
 
-    assert False
 
 def test_bytes_io_stream():
 
@@ -103,9 +102,13 @@ def test_bytes_io_stream():
             return True
 
         def readinto(self, b):
-            chunk = self.input.read().decode("utf-8").lower().encode("utf-8")
-            b[:len(chunk)] = chunk
-            return len(chunk)
+            pos = 0
+            low = self.input.read().decode("utf-8")
+            for char in low:
+                chunk = char.lower().encode("utf-8")
+                b[pos:len(chunk)] = chunk
+                pos += len(chunk)
+            return pos
 
     input = BytesIO()
     input.write(b"Hi ")
