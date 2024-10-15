@@ -30,9 +30,9 @@ class RecompressPlugin(OperationPlugin):
         def data_callback():
             logger.info("hi")
             with data() as source_io:
-                # with gzip.open(source_io, "rb") if self._is_compressed(id, metadata) else nullcontext(source_io) as source_stream:
-                logger.debug(f"stream is: {source_io}")
-                yield RecompressorStream(source_io, self.verbose)
+                with gzip.open(source_io, "rb") if self._is_compressed(id, metadata) else nullcontext(source_io) as source_stream:
+                    logger.debug(f"stream is: {source_io}")
+                    yield RecompressorStream(source_stream, self.verbose)
 
         return id, data_callback, {**metadata, "compression": "application/gzip"}
 
