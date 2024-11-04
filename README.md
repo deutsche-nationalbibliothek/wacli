@@ -7,6 +7,8 @@ It's tasks are:
 - retrieve archive files from the repository
 - execute the indexers to make the archived webpages available
 
+**It is still in prototype state and under construction.**
+
 ## Get Archived Webpages
 
 This tool gets archived webpages from the DNB catalog graph.
@@ -14,7 +16,7 @@ It queries for items (*snapshots*) that are part of (`dcterms:isPartOf`) [online
 
 # Requirements and Usage
 
-This projects uses [poetry](https://python-poetry.org/) (maybe in the [rye](https://rye.astral.sh/) future).
+This projects uses [poetry](https://python-poetry.org/).
 
 ## Installation
 
