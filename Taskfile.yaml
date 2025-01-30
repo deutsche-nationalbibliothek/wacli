@@ -13,6 +13,11 @@ tasks:
       - poetry run ruff format
       - poetry run ruff check --fix
 
+  build:
+    desc: Build the container image
+    cmds:
+      - podman build -t wacli .
+
   test:
     desc: Run tests
     cmds:
