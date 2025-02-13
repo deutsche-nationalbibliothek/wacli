@@ -42,12 +42,19 @@ class GraphCatalog(CatalogPlugin):
             "rdact", Namespace("http://rdaregistry.info/termList/RDACarrierType/")
         )
 
+        self.order_offset_limit = ""
+
+        limit = configuration.get("limit")
+        if limit is not None:
+            self.order_offset_limit = f"limit {limit}"
+
     def initialize(self):
         """Load the graph into a local storage"""
         # specify format due to https://github.com/ad-freiburg/qlever/issues/1372
         store = SPARQLStore(query_endpoint=self.endpoint, returnFormat="turtle")
         remote_graph = Graph(store=store, namespace_manager=self.namespaces)
-        remote_result = remote_graph.query("""
+        remote_result = remote_graph.query(
+            """
             CONSTRUCT {
               ?page foaf:isPrimaryTopicOf ?topic;
                     dc:title ?title;
@@ -70,10 +77,13 @@ class GraphCatalog(CatalogPlugin):
               }
               filter (!bound(?snapshot_type))
             }
-        """)
+        """
+            + self.order_offset_limit
+        )
         temporary_graph = remote_result.graph
         temporary_graph.namespace_manager = self.namespaces
-        local_result = temporary_graph.query("""
+        local_result = temporary_graph.query(
+            """
             CONSTRUCT {
               ?page foaf:isPrimaryTopicOf ?topic;
                     dc:title ?title;
@@ -93,7 +103,9 @@ class GraphCatalog(CatalogPlugin):
               ?description dcterms:modified ?modification .
               bind(SUBSTR(str(?identifier), 9) as ?idn)
             }
-        """)
+        """
+            + self.order_offset_limit
+        )
         graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl", "w")
         website_graph = local_result.graph
         website_graph.namespace_manager = self.namespaces

@@ -11,6 +11,7 @@ from .plugin_manager import PluginManager
 @click.pass_context
 @click.option("--endpoint", envvar="SPARQL_TITLE_DATA", default=None)
 @click.option("--graph-file", envvar="WEBSITE_GRAPH_FILE", default=None)
+@click.option("--graph-limit", envvar="WEBSITE_GRAPH_LIMIT", default=None)
 @click.option("--aras-rest-base", envvar="ARAS_REST_BASE", default=None)
 @click.option("--aras-repo", envvar="ARAS_REPO", default=None)
 @click.option("--warc-dir", "--warc-directory", envvar="WARC_DIRECTORY", default=None)
@@ -25,6 +26,7 @@ def cli(
     ctx,
     endpoint,
     graph_file,
+    graph_limit,
     aras_rest_base,
     aras_repo,
     warc_dir,
@@ -38,6 +40,7 @@ def cli(
             {
                 "module": "wacli_plugins.catalog.graph",
                 "endpoint": endpoint,
+                "limit": graph_limit,
                 "storage_backend": "catalog_backend",
             }
         ],
