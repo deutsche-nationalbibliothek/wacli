@@ -75,10 +75,10 @@ def test_recompress_warcs(tmp_path):
         assert os.path.getsize(output_path / file) > 0
 
 
-from io import BytesIO, BufferedReader, RawIOBase
+from io import BufferedReader, BytesIO, RawIOBase
+
 
 def test_bytes_io():
-
     input = BytesIO()
     input.write(b"Hi ")
     input.write(b"Who ")
@@ -98,7 +98,6 @@ def test_bytes_io():
 
 
 def test_bytes_io_stream():
-
     class LazyLower(RawIOBase):
         def __init__(self, input):
             self.input = input
@@ -111,7 +110,7 @@ def test_bytes_io_stream():
             low = self.input.read().decode("utf-8")
             for char in low:
                 chunk = char.lower().encode("utf-8")
-                b[pos:len(chunk)] = chunk
+                b[pos : len(chunk)] = chunk
                 pos += len(chunk)
             return pos
 

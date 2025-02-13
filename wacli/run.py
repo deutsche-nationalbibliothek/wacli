@@ -197,5 +197,6 @@ def check_warcs(ctx):
     for checker in checkers:
         report_storage.store_stream(checker.run(warc_list))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cli()
