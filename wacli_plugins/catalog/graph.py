@@ -4,6 +4,7 @@ from rdflib import Graph
 from rdflib.namespace import Namespace, NamespaceManager
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
 
+from wacli.plugin_manager import ConfigurationError
 from wacli.plugin_types import CatalogPlugin
 
 
@@ -15,6 +16,10 @@ class GraphCatalog(CatalogPlugin):
 
     def configure(self, configuration):
         self.endpoint = configuration.get("endpoint")
+        if self.endpoint is None or self.endpoint == "":
+            raise ConfigurationError(
+                "The SPARQL query endpoint needs to be set to a not empty value."
+            )
         self.storage_backend = self.plugin_manager.get(
             configuration.get("storage_backend")
         )
