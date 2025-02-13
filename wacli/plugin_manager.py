@@ -10,6 +10,10 @@ import wacli_plugins.indexer
 import wacli_plugins.storage
 
 
+class ConfigurationException(Exception):
+    pass
+
+
 class PluginManager:
     def __init__(self):
         self.registry = defaultdict(list)
@@ -44,7 +48,7 @@ class PluginManager:
                 self.register_plugin(role, plugin)
 
     def register_plugin(self, role: str, plugin_configuration: dict):
-        logger.debug(f"import_module: {plugin_configuration["module"]}")
+        logger.debug(f"import_module: {plugin_configuration["module"]} for role {role}")
         plugin_module = importlib.import_module(plugin_configuration["module"])
         if hasattr(plugin_module, "export"):
             self.registry[role].append(
@@ -61,7 +65,10 @@ class PluginManager:
     def get_all(self, name: str):
         for plugin in self.get_modules(name):
             if "instance" not in plugin:
-                plugin["instance"] = self.plugin_factory.get_plugin(plugin)
+                try:
+                    plugin["instance"] = self.plugin_factory.get_plugin(plugin)
+                except ConfigurationException as e:
+                    raise ConfigurationException(f"role '{name}' {e}")
             yield plugin["instance"]
 
     def get(self, name: str):
@@ -75,7 +82,10 @@ class PluginFactory:
     def get_plugin(self, plugin: dict):
         instance = plugin["class"]()
         instance._plugin_manager = self.plugin_manager
-        instance.configure(plugin)
+        try:
+            instance.configure(plugin)
+        except ConfigurationException as e:
+            raise ConfigurationException(f"(module: {plugin["module"]}): {e}")
         return instance
 
 
