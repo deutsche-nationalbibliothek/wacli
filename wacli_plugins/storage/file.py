@@ -4,7 +4,7 @@ from os.path import basename, dirname
 from pathlib import Path
 from typing import BinaryIO, TextIO, Union
 
-from wacli.plugin_manager import ConfigurationException
+from wacli.plugin_manager import ConfigurationError
 
 from .directory import DirectoryStorage
 
@@ -15,7 +15,7 @@ class FileStorage(DirectoryStorage):
     def configure(self, configuration):
         path = configuration.get("path")
         if path is None:
-            raise ConfigurationException("The path can not be None.")
+            raise ConfigurationError("The path can not be None.")
         self.path = Path(dirname(path))
         self.id = Path(basename(path))
 

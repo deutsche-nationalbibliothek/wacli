@@ -10,7 +10,7 @@ import wacli_plugins.indexer
 import wacli_plugins.storage
 
 
-class ConfigurationException(Exception):
+class ConfigurationError(Exception):
     pass
 
 
@@ -67,8 +67,8 @@ class PluginManager:
             if "instance" not in plugin:
                 try:
                     plugin["instance"] = self.plugin_factory.get_plugin(plugin)
-                except ConfigurationException as e:
-                    raise ConfigurationException(f"role '{name}' {e}")
+                except ConfigurationError as e:
+                    raise ConfigurationError(f"role '{name}' {e}")
             yield plugin["instance"]
 
     def get(self, name: str):
@@ -84,8 +84,8 @@ class PluginFactory:
         instance._plugin_manager = self.plugin_manager
         try:
             instance.configure(plugin)
-        except ConfigurationException as e:
-            raise ConfigurationException(f"(module: {plugin["module"]}): {e}")
+        except ConfigurationError as e:
+            raise ConfigurationError(f"(module: {plugin["module"]}): {e}")
         return instance
 
 
