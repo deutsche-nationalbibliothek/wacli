@@ -15,7 +15,7 @@ loguru = "^0.7.2"
 aras-py = {git = "https://github.com/deutsche-nationalbibliothek/aras-py"}
 uuid6 = "^2024.7.10"
 docker = "^7.1.0"
-warcio = {git = "https://github.com/white-gecko/warcio", rev = "feature/streamRecompressor"}
+warcio = {git = "https://github.com/deutsche-nationalbibliothek/warcio", rev = "wip/recompressorStream"}
 
 [tool.ruff]
 target-version = "py312"

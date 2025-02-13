@@ -937,9 +937,9 @@ testing = ["hookdns", "httpbin (>=0.10.2)", "pytest", "pytest-cov", "requests", 
 
 [package.source]
 type = "git"
-url = "https://github.com/white-gecko/warcio"
-reference = "feature/streamRecompressor"
-resolved_reference = "d66f177235c2db5f38a3a17d1eecdaf84dec6c41"
+url = "https://github.com/deutsche-nationalbibliothek/warcio"
+reference = "wip/recompressorStream"
+resolved_reference = "c9219267aa6cde19315cbf0f9c601d3c598b17c0"
 
 [[package]]
 name = "win32-setctime"
@@ -960,4 +960,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "f7385db506223e292b8f8f37e6a016208939f5eb76906517e420b0d14e714b7a"
+content-hash = "f1202462db7b499ed05a30e99eaae7bfcceefbbe89cf00d22eec3826302282f6"
