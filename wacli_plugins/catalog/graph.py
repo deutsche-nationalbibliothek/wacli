@@ -114,7 +114,7 @@ class GraphCatalog(CatalogPlugin):
         )
         logger.debug(f"local_query: {local_query}")
         local_result = temporary_graph.query(local_query)
-        graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl", "w")
+        graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl", "wb")
         website_graph = local_result.graph
         website_graph.namespace_manager = self.namespaces
         website_graph.serialize(graph_file_io(), format="turtle")
