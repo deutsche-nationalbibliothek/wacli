@@ -1,5 +1,8 @@
 """This is the directory storage module."""
 
+from textwrap import dedent
+
+from loguru import logger
 from rdflib import Graph
 from rdflib.namespace import Namespace, NamespaceManager
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
@@ -53,8 +56,8 @@ class GraphCatalog(CatalogPlugin):
         # specify format due to https://github.com/ad-freiburg/qlever/issues/1372
         store = SPARQLStore(query_endpoint=self.endpoint, returnFormat="turtle")
         remote_graph = Graph(store=store, namespace_manager=self.namespaces)
-        remote_result = remote_graph.query(
-            """
+        remote_query = (
+            dedent("""
             CONSTRUCT {
               ?page foaf:isPrimaryTopicOf ?topic;
                     dc:title ?title;
@@ -77,13 +80,16 @@ class GraphCatalog(CatalogPlugin):
               }
               filter (!bound(?snapshot_type))
             }
-        """
+        """)
             + self.order_offset_limit
         )
+        logger.debug(f"remote_query: {remote_query}")
+        logger.debug(f"self.endpoint: {self.endpoint}")
+        remote_result = remote_graph.query(remote_query)
         temporary_graph = remote_result.graph
         temporary_graph.namespace_manager = self.namespaces
-        local_result = temporary_graph.query(
-            """
+        local_query = (
+            dedent("""
             CONSTRUCT {
               ?page foaf:isPrimaryTopicOf ?topic;
                     dc:title ?title;
@@ -103,9 +109,11 @@ class GraphCatalog(CatalogPlugin):
               ?description dcterms:modified ?modification .
               bind(SUBSTR(str(?identifier), 9) as ?idn)
             }
-        """
+        """)
             + self.order_offset_limit
         )
+        logger.debug(f"local_query: {local_query}")
+        local_result = temporary_graph.query(local_query)
         graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl", "w")
         website_graph = local_result.graph
         website_graph.namespace_manager = self.namespaces
