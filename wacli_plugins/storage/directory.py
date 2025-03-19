@@ -16,7 +16,12 @@ class DirectoryStorage(StoragePlugin):
     """This is the directory storage plugin."""
 
     def configure(self, configuration):
-        self.path = Path(configuration.get("path"))
+        path = configuration.get("path")
+        if path is None or path == "":
+            raise ConfigurationError(
+                "A path needs to be set to a not empty value for a directory storage."
+            )
+        self.path = Path(path)
 
     def store(
         self,
