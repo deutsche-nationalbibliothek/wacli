@@ -124,6 +124,10 @@ def load_warcs(ctx):
     source_repository = ctx.obj["plugin_manager"].get("source_repository")
     local_repository = ctx.obj["plugin_manager"].get("local_repository")
 
+    logger.debug("Load WARCs …")
+    warc_list = catalog.list()
+    logger.debug(warc_list)
+
     with Progress() as progress:
         tasks = {}
 
@@ -153,6 +157,7 @@ def load_warcs(ctx):
             source_repository.retrieve_stream(catalog.list(), callback=source_callback),
             callback=target_callback,
         )
+    logger.debug("DONE loading WARCs.")
 
 
 @cli.command()
