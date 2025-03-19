@@ -153,6 +153,7 @@ def load_warcs(ctx):
         target_callback = callback_factory("[blue]Storing", id_prefix="target")
         source_callback = callback_factory("[blue]Downloading", id_prefix="source")
 
+        logger.debug("Setup download tasks …")
         local_repository.store_stream(
             source_repository.retrieve_stream(catalog.list(), callback=source_callback),
             callback=target_callback,
