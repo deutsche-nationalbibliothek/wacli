@@ -80,7 +80,7 @@ class GraphCatalog(CatalogPlugin):
               }
               filter (!bound(?snapshot_type))
             }
-        """)
+            """)
             + self.order_offset_limit
         )
         logger.debug(f"remote_query: {remote_query}")
