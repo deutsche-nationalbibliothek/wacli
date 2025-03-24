@@ -3,12 +3,30 @@
 from textwrap import dedent
 
 from loguru import logger
-from rdflib import Graph
-from rdflib.namespace import Namespace, NamespaceManager
+from rdflib import Graph, URIRef
+from rdflib.namespace import (
+    DC,
+    DCTERMS,
+    FOAF,
+    RDF,
+    RDFS,
+    XSD,
+    Namespace,
+    NamespaceManager,
+)
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
+from uuid6 import uuid7
 
 from wacli.plugin_manager import ConfigurationError
 from wacli.plugin_types import CatalogPlugin
+
+BIBO = Namespace("http://purl.org/ontology/bibo/")
+GNDO = Namespace("https://d-nb.info/standards/elementset/gnd#")
+WDRS = Namespace("http://www.w3.org/2007/05/powder-s#")
+RDACT = Namespace("http://rdaregistry.info/termList/RDACarrierType/")
+DNB = Namespace("https://d-nb.info/")
+"""Web Archive Schema or Web Archive Standard Elementset"""
+WASE = Namespace("https://d-nb.info/standards/elementset/webarchive#")
 
 
 class GraphCatalog(CatalogPlugin):
@@ -28,22 +46,17 @@ class GraphCatalog(CatalogPlugin):
         )
 
         self.namespaces = NamespaceManager(Graph())
-        self.namespaces.bind(
-            "rdf", Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
-        )
-        self.namespaces.bind("rdfs", Namespace("http://www.w3.org/2000/01/rdf-schema#"))
-        self.namespaces.bind("foaf", Namespace("http://xmlns.com/foaf/0.1/"))
-        self.namespaces.bind("dc", Namespace("http://purl.org/dc/elements/1.1/"))
-        self.namespaces.bind("dcterms", Namespace("http://purl.org/dc/terms/"))
-        self.namespaces.bind("bibo", Namespace("http://purl.org/ontology/bibo/"))
-        self.namespaces.bind(
-            "gndo", Namespace("https://d-nb.info/standards/elementset/gnd#")
-        )
-        self.namespaces.bind("xsd", Namespace("http://www.w3.org/2001/XMLSchema#"))
-        self.namespaces.bind("wdrs", Namespace("http://www.w3.org/2007/05/powder-s#"))
-        self.namespaces.bind(
-            "rdact", Namespace("http://rdaregistry.info/termList/RDACarrierType/")
-        )
+        self.namespaces.bind("rdf", RDF)
+        self.namespaces.bind("rdfs", RDFS)
+        self.namespaces.bind("foaf", FOAF)
+        self.namespaces.bind("dc", DC)
+        self.namespaces.bind("dcterms", DCTERMS)
+        self.namespaces.bind("bibo", BIBO)
+        self.namespaces.bind("gndo", GNDO)
+        self.namespaces.bind("xsd", XSD)
+        self.namespaces.bind("wdrs", WDRS)
+        self.namespaces.bind("rdact", RDACT)
+        self.namespaces.bind("wase", WASE)
 
         self.order_offset_limit = ""
 
