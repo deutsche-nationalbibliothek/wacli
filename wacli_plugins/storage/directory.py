@@ -9,6 +9,7 @@ from typing import IO
 
 from loguru import logger
 
+from wacli.plugin_manager import ConfigurationError
 from wacli.plugin_types import StoragePlugin, StorageStream, StoreItem
 
 
