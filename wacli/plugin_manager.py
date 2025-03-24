@@ -32,8 +32,8 @@ class PluginManager:
         for role, plugins in self.registry.items():
             logger.debug(f"# {role}")
             for plugin in plugins:
-                logger.debug(f"{plugin["class"].__name__}")
-                logger.debug(f"{plugin["class"].__doc__}\n")
+                logger.debug(f"{plugin['class'].__name__}")
+                logger.debug(f"{plugin['class'].__doc__}\n")
                 logger.debug(f"{plugin}\n")
 
     def list_available_plugins(self):
@@ -48,7 +48,7 @@ class PluginManager:
                 self.register_plugin(role, plugin)
 
     def register_plugin(self, role: str, plugin_configuration: dict):
-        logger.debug(f"import_module: {plugin_configuration["module"]} for role {role}")
+        logger.debug(f"import_module: {plugin_configuration['module']} for role {role}")
         plugin_module = importlib.import_module(plugin_configuration["module"])
         if hasattr(plugin_module, "export"):
             self.registry[role].append(
@@ -56,7 +56,7 @@ class PluginManager:
             )
         else:
             logger.error(
-                f"configured module: {plugin_configuration["module"]} has no export"
+                f"configured module: {plugin_configuration['module']} has no export"
             )
 
     def get_modules(self, name: str):
@@ -85,7 +85,7 @@ class PluginFactory:
         try:
             instance.configure(plugin)
         except ConfigurationError as e:
-            raise ConfigurationError(f"(module: {plugin["module"]}): {e}")
+            raise ConfigurationError(f"(module: {plugin['module']}): {e}")
         return instance
 
 

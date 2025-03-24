@@ -37,7 +37,7 @@ def select_patch(cls, endpoint):
         } limit 10
     """)
     for row in res:
-        logger.debug(f"{row["s"]}, {row["p"]}, {row["o"]}")
+        logger.debug(f"{row['s']}, {row['p']}, {row['o']}")
 
 
 def construct_patch(cls, endpoint):
