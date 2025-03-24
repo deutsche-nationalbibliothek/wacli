@@ -71,10 +71,11 @@ class DirectoryStorage(StoragePlugin):
                                 name=path,
                             )
             except UnicodeEncodeError as e:
-                logger.debug(f"Report Exception for id={id}: {e}")
+                logger.debug(f"Report Exception for id={path}: {e}")
                 if self.catalog:
+                    # TODO get from path to id/IRI again
                     self.catalog.report(
-                        id,
+                        path,
                         [
                             (RDF.type, WASE.Report),
                             (RDF.type, WASE["Exception"]),
