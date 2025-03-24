@@ -26,13 +26,14 @@ class RecompressPlugin(OperationPlugin):
                     yield self._recompress(id, data, metadata)
                 else:
                     yield id, self._iterate_stream(data), metadata
-            except Exception as e:
+            except UnicodeEncodeError as e:
                 logger.debug(f"Report Exception for id={id}: {e}")
                 if self.catalog:
                     self.catalog.report(id,
                         [
                             (RDF.type, WASE.Report),
                             (RDF.type, WASE["Exception"]),
+                            (RDF.type, WASE[f"Exception-{type(e).__name__}"]),
                             (RDFS.comment, f"{e}"),
                         ]
                     )
