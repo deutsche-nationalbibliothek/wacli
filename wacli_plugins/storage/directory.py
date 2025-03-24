@@ -11,6 +11,7 @@ from loguru import logger
 
 from wacli.plugin_manager import ConfigurationError
 from wacli.plugin_types import StoragePlugin, StorageStream, StoreItem
+from wacli_plugins.catalog.graph import RDF, WASE
 
 
 class DirectoryStorage(StoragePlugin):
@@ -23,6 +24,7 @@ class DirectoryStorage(StoragePlugin):
                 "A path needs to be set to a not empty value for a directory storage."
             )
         self.path = Path(path)
+        self.catalog = configuration.get("catalog", None)
 
     def store(
         self,
@@ -50,23 +52,35 @@ class DirectoryStorage(StoragePlugin):
             target, target_metadata = self._retrieve(path, mode, callback)
             if target_callback := target_metadata.get("callback", False):
                 callbacks.append(target_callback)
-            with target() as target_io:
-                source_io.wacli_read = source_io.read
-                while chunk := source_io.wacli_read(DEFAULT_BUFFER_SIZE):
-                    try:
-                        target_io.write(chunk)
-                    except TypeError:
-                        logger.debug("overwrite source_io.wacli_read")
-                        target_io.write(chunk.encode("utf-8"))
-                        source_io.wacli_read = lambda buffer_size: source_io.read(
-                            buffer_size
-                        ).encode("utf-8")
-                    for callback in callbacks:
-                        callback(
-                            advance=DEFAULT_BUFFER_SIZE,
-                            total=metadata["size"],
-                            name=path,
-                        )
+            try:
+                with target() as target_io:
+                    source_io.wacli_read = source_io.read
+                    while chunk := source_io.wacli_read(DEFAULT_BUFFER_SIZE):
+                        try:
+                            target_io.write(chunk)
+                        except TypeError:
+                            logger.debug("overwrite source_io.wacli_read")
+                            target_io.write(chunk.encode("utf-8"))
+                            source_io.wacli_read = lambda buffer_size: source_io.read(
+                                buffer_size
+                            ).encode("utf-8")
+                        for callback in callbacks:
+                            callback(
+                                advance=DEFAULT_BUFFER_SIZE,
+                                total=metadata["size"],
+                                name=path,
+                            )
+            except UnicodeEncodeError as e:
+                logger.debug(f"Report Exception for id={id}: {e}")
+                if self.catalog:
+                    self.catalog.report(id,
+                        [
+                            (RDF.type, WASE.Report),
+                            (RDF.type, WASE["Exception"]),
+                            (RDF.type, WASE[f"Exception-{type(e).__name__}"]),
+                            (RDFS.comment, f"{e}"),
+                        ]
+                    )
 
     def store_stream(
         self,

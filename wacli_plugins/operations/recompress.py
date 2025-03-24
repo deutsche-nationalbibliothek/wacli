@@ -6,7 +6,6 @@ from loguru import logger
 from warcio.recompressor import RecompressorStream
 
 from wacli.plugin_types import OperationPlugin, StorageStream
-from wacli_plugins.catalog.graph import RDF, WASE
 
 
 class RecompressPlugin(OperationPlugin):
@@ -14,29 +13,16 @@ class RecompressPlugin(OperationPlugin):
 
     def configure(self, configuration):
         self.verbose = configuration.get("verbose", False)
-        self.catalog = configuration.get("catalog", None)
 
     def run(self, storage_stream: StorageStream) -> StorageStream:
         return self._iterate_stream(storage_stream)
 
     def _iterate_stream(self, storage_stream: StorageStream) -> StorageStream:
         for id, data, metadata in storage_stream:
-            try:
-                if isinstance(data, Callable):
-                    yield self._recompress(id, data, metadata)
-                else:
-                    yield id, self._iterate_stream(data), metadata
-            except UnicodeEncodeError as e:
-                logger.debug(f"Report Exception for id={id}: {e}")
-                if self.catalog:
-                    self.catalog.report(id,
-                        [
-                            (RDF.type, WASE.Report),
-                            (RDF.type, WASE["Exception"]),
-                            (RDF.type, WASE[f"Exception-{type(e).__name__}"]),
-                            (RDFS.comment, f"{e}"),
-                        ]
-                    )
+            if isinstance(data, Callable):
+                yield self._recompress(id, data, metadata)
+            else:
+                yield id, self._iterate_stream(data), metadata
 
     def _recompress(self, id, data, metadata):
         @contextmanager
