@@ -11,9 +11,9 @@ StoreItem: TypeAlias = tuple[Callable[[], IO], dict]
 
 
 class CatalogPlugin(Plugin):
-    """Access metadata for web archive files.
+    """Access and store metadata for web archive files.
 
-    Accessing the metadata should allow to get a complte list of all web archive files.
+    Get a complete list of all web archive files, store metadata along with the web archive files.
     """
 
     @abstractmethod
@@ -22,6 +22,17 @@ class CatalogPlugin(Plugin):
 
     @abstractmethod
     def list(self):
+        """List the web archive files in the catalog."""
+        pass
+
+    @abstractmethod
+    def annotate(self, id: str, metadata: list[tuple] = ()):
+        """Add the metadata to the provided resource."""
+        pass
+
+    @abstractmethod
+    def report(self, id: str, report: list[tuple] = ()):
+        """Create a report for the respective resource."""
         pass
 
 
