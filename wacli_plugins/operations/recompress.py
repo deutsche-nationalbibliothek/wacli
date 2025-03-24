@@ -27,8 +27,9 @@ class RecompressPlugin(OperationPlugin):
                 else:
                     yield id, self._iterate_stream(data), metadata
             except Exception as e:
+                logger.debug(f"Report Exception for id={id}: {e}")
                 if self.catalog:
-                    self.catalog.report(
+                    self.catalog.report(id,
                         [
                             (RDF.type, WASE.Report),
                             (RDF.type, WASE["Exception"]),
