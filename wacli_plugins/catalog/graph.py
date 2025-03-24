@@ -18,7 +18,7 @@ from rdflib.plugins.stores.sparqlstore import SPARQLStore
 from uuid6 import uuid7
 
 from wacli.plugin_manager import ConfigurationError
-from wacli.plugin_types import CatalogPlugin
+from wacli.plugin_types import CatalogPlugin, MetadataList
 
 BIBO = Namespace("http://purl.org/ontology/bibo/")
 GNDO = Namespace("https://d-nb.info/standards/elementset/gnd#")
@@ -34,6 +34,7 @@ class GraphCatalog(CatalogPlugin):
 
     def __init__(self):
         super(GraphCatalog, self).__init__()
+        self.website_graph = None
 
     def configure(self, configuration):
         self.endpoint = configuration.get("endpoint")
@@ -132,12 +133,18 @@ class GraphCatalog(CatalogPlugin):
         website_graph.namespace_manager = self.namespaces
         website_graph.serialize(graph_file_io(), format="turtle")
 
+    def _get_graph(self) -> Graph:
+        """Load the website graph into memory."""
+        if not self.website_graph:
+            self.website_graph = Graph()
+            graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl")
+            self.website_graph.parse(source=graph_file_io())
+            self.website_graph.namespace_manager = self.namespaces
+        return self.website_graph
+
     def list(self) -> list:
         """List available web archive entries by IDN."""
-        website_graph = Graph()
-        graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl")
-        website_graph.parse(source=graph_file_io())
-        website_graph.namespace_manager = self.namespaces
+        website_graph = self._get_graph()
         idn_result = website_graph.query("""
             select distinct ?idn {
                 ?snapshot dcterms:isPartOf ?page .
@@ -145,6 +152,24 @@ class GraphCatalog(CatalogPlugin):
             }
         """)
         return [row["idn"].value for row in idn_result]
+
+    def _get_archive_resource(self, id: URIRef | str):
+        """Add the metadata to the provided resource."""
+        if isinstance(id, str):
+            id = DNB[id]
+        return self._get_graph().resource(id)
+
+    def annotate(self, id: URIRef | str, metadata: MetadataList = ()):
+        """Add the metadata to the provided resource."""
+        archive_resource = self._get_archive_resource(id)
+        list(map(lambda item: archive_resource.add(*item), metadata))
+
+    def report(self, id: URIRef | str, report: MetadataList = ()):
+        """Create a report for the respective resource."""
+        archive_resource = self._get_archive_resource(id)
+        report_resource = self._get_graph().resource(URIRef(f"urn:uuid:{uuid7()}"))
+        archive_resource.add(WASE["report"], report_resource.identifier)
+        list(map(lambda item: report_resource.add(*item), report))
 
 
 export = GraphCatalog
