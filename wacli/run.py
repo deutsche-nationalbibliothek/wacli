@@ -196,12 +196,12 @@ def recompress_warcs(ctx):
 def check_warcs(ctx):
     """Check warc files if they are valid"""
     local_repository = ctx.obj["plugin_manager"].get("local_repository")
-    report_storage = ctx.obj["plugin_manager"].get("report_storage")
     checkers = ctx.obj["plugin_manager"].get_all("checker")
 
     warc_list = local_repository.list()
     for checker in checkers:
-        report_storage.store_stream(checker.run(warc_list))
+        """TODO: stream_iterator should be some class that consumes a storage stream to call all operations"""
+        stream_iterator.store_stream(checker.run(warc_list))
 
 
 if __name__ == "__main__":
