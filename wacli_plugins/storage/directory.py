@@ -73,13 +73,14 @@ class DirectoryStorage(StoragePlugin):
             except UnicodeEncodeError as e:
                 logger.debug(f"Report Exception for id={id}: {e}")
                 if self.catalog:
-                    self.catalog.report(id,
+                    self.catalog.report(
+                        id,
                         [
                             (RDF.type, WASE.Report),
                             (RDF.type, WASE["Exception"]),
                             (RDF.type, WASE[f"Exception-{type(e).__name__}"]),
                             (RDFS.comment, f"{e}"),
-                        ]
+                        ],
                     )
 
     def store_stream(
