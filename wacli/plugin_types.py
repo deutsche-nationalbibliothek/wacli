@@ -8,6 +8,7 @@ StorageStream: TypeAlias = list[
     tuple[str, Union["StorageStream", Callable[[], IO]], dict]
 ]
 StoreItem: TypeAlias = tuple[Callable[[], IO], dict]
+MetadataList: TypeAlias = list[tuple[object, object]]
 
 
 class CatalogPlugin(Plugin):
@@ -26,12 +27,12 @@ class CatalogPlugin(Plugin):
         pass
 
     @abstractmethod
-    def annotate(self, id: str, metadata: list[tuple] = ()):
+    def annotate(self, id: str, metadata: StoreItem = []):
         """Add the metadata to the provided resource."""
         pass
 
     @abstractmethod
-    def report(self, id: str, report: list[tuple] = ()):
+    def report(self, id: str, report: StoreItem = []):
         """Create a report for the respective resource."""
         pass
 
