@@ -23,6 +23,7 @@ from wacli.plugin_types import CatalogPlugin, MetadataList
 BIBO = Namespace("http://purl.org/ontology/bibo/")
 GNDO = Namespace("https://d-nb.info/standards/elementset/gnd#")
 WDRS = Namespace("http://www.w3.org/2007/05/powder-s#")
+RDAU = Namespace("http://rdaregistry.info/Elements/u/")
 RDACT = Namespace("http://rdaregistry.info/termList/RDACarrierType/")
 DNB = Namespace("https://d-nb.info/")
 """Web Archive Schema or Web Archive Standard Elementset"""
@@ -57,6 +58,7 @@ class GraphCatalog(CatalogPlugin):
         self.namespaces.bind("xsd", XSD)
         self.namespaces.bind("wdrs", WDRS)
         self.namespaces.bind("rdact", RDACT)
+        self.namespaces.bind("rdau", RDAU)
         self.namespaces.bind("wase", WASE)
 
         self.order_offset_limit = ""
@@ -73,20 +75,30 @@ class GraphCatalog(CatalogPlugin):
         remote_query = (
             dedent("""
             CONSTRUCT {
-              ?page foaf:isPrimaryTopicOf ?topic;
+              ?page foaf:primaryTopic ?topic;
                     dc:title ?title;
                     dcterms:medium rdact:1018 .
               ?snapshot dcterms:isPartOf ?page ;
-                        dc:identifier ?identifier ;
-                        wdrs:describedby ?description .
+                    dcterms:medium rdact:1018 ;
+                    rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+                    rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
+                    rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+                    dc:identifier ?identifier ;
+                    bibo:issue ?datestamp ;
+                    wdrs:describedby ?description .
               ?description dcterms:modified ?modification .
             } WHERE {
-              ?page foaf:isPrimaryTopicOf ?topic;
+              ?page foaf:primaryTopic ?topic;
                     dc:title ?title;
                     dcterms:medium rdact:1018 .
               ?snapshot dcterms:isPartOf ?page ;
-                  dc:identifier ?identifier ;
-                  wdrs:describedby ?description .
+                    dcterms:medium rdact:1018 ;
+                    rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+                    rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
+                    rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+                    dc:identifier ?identifier ;
+                    bibo:issue ?datestamp ;
+                    wdrs:describedby ?description .
               ?description dcterms:modified ?modification .
               filter(?modification < "2020-01-01T00:00:00.000"^^xsd:dateTime)
               optional {
@@ -102,24 +114,29 @@ class GraphCatalog(CatalogPlugin):
         remote_result = remote_graph.query(remote_query)
         temporary_graph = remote_result.graph
         temporary_graph.namespace_manager = self.namespaces
+        logger.debug(temporary_graph.serialize(format="text/turtle"))
         local_query = (
             dedent("""
             CONSTRUCT {
-              ?page foaf:isPrimaryTopicOf ?topic;
+              ?page foaf:primaryTopic ?topic;
                     dc:title ?title;
-                    dcterms:medium rdact:1018 .
+                    dcterms:medium rdact:1018 ;
+                    ?pp ?po .
               ?snapshot dcterms:isPartOf ?page ;
                         dc:identifier ?identifier, ?idn ;
                         gndo:gndIdentifier ?idn ;
-                        wdrs:describedby ?description .
+                        wdrs:describedby ?description ;
+                        ?sp ?so .
               ?description dcterms:modified ?modification .
             } WHERE {
-              ?page foaf:isPrimaryTopicOf ?topic;
+              ?page foaf:primaryTopic ?topic;
                     dc:title ?title;
-                    dcterms:medium rdact:1018 .
+                    dcterms:medium rdact:1018 ;
+                    ?pp ?po .
               ?snapshot dcterms:isPartOf ?page ;
                   dc:identifier ?identifier ;
-                  wdrs:describedby ?description .
+                  wdrs:describedby ?description ;
+                  ?sp ?so .
               ?description dcterms:modified ?modification .
               bind(SUBSTR(str(?identifier), 9) as ?idn)
             }
