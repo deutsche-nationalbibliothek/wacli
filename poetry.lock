@@ -746,7 +746,7 @@ orjson = ["orjson (>=3.9.14,<4)"]
 type = "git"
 url = "https://github.com/white-gecko/rdflib"
 reference = "feature/sparql_result_parsing"
-resolved_reference = "71d4938be7f69a75654ba0c47488205c9e0da4bc"
+resolved_reference = "17ff54416d3441cd04f2499d205446a860054145"
 
 [[package]]
 name = "requests"
