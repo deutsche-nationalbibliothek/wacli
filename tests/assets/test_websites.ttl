@@ -13,6 +13,6 @@
 
 <https://d-nb.info/1234567891> dc:title "Example"^^xsd:string ;
     dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-    foaf:isPrimaryTopicOf "http://example.org/"^^xsd:string .
+    foaf:primaryTopic "http://example.org/"^^xsd:string .
 
 <https://d-nb.info/1234567890/about> dcterms:modified "2017-12-03T16:44:37"^^xsd:dateTime .
