@@ -6,12 +6,12 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <https://d-nb.info/1234567890> dc:identifier "(DE-101)1234567890"^^xsd:string,
-        "1048103749" ;
+        "1048103749" ; # a bibo:Article, bibo:Document, bibo:Issue, bibo:Periodical, bibo:Series
     dcterms:isPartOf <https://d-nb.info/1234567891> ;
     wdrs:describedby <https://d-nb.info/1234567890/about> ;
     ns2:gndIdentifier "1234567890" .
 
-<https://d-nb.info/1234567891> dc:title "Example"^^xsd:string ;
+<https://d-nb.info/1234567891> dc:title "Example"^^xsd:string ; # a bibo:Collection, bibo:Periodical, bibo:Series
     dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
     foaf:primaryTopic "http://example.org/"^^xsd:string .
 
