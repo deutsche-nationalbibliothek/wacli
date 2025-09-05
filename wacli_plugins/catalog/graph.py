@@ -1,8 +1,9 @@
 """This is the directory storage module."""
 
-from textwrap import dedent
+import importlib.resources
 
 from loguru import logger
+from query_collection import TemplateQueryCollection
 from rdflib import Graph, URIRef
 from rdflib.namespace import (
     DC,
@@ -12,7 +13,6 @@ from rdflib.namespace import (
     RDFS,
     XSD,
     Namespace,
-    NamespaceManager,
 )
 from rdflib.plugins.stores.sparqlstore import SPARQLStore
 from uuid6 import uuid7
@@ -37,7 +37,7 @@ class GraphCatalog(CatalogPlugin):
         super(GraphCatalog, self).__init__()
         self.website_graph = None
 
-    def configure(self, configuration):
+    def configure(self, configuration: dict):
         self.endpoint = configuration.get("endpoint")
         if self.endpoint is None or self.endpoint == "":
             raise ConfigurationError(
@@ -47,7 +47,18 @@ class GraphCatalog(CatalogPlugin):
             configuration.get("storage_backend")
         )
 
-        self.namespaces = NamespaceManager(Graph())
+        self.template_query_collection = TemplateQueryCollection()
+        if query_collection_backend := configuration.get("query_collection_backend"):
+            self.query_collection_backend = self.plugin_manager.get(
+                query_collection_backend
+            )
+            for f in self.query_collection_backend.list_files():
+                self.template_query_collection.loadFromFile(f)
+        else:
+            with importlib.resources.path(self.__module__, "queries") as data_path:
+                self.template_query_collection.loadFromDirectory(data_path)
+
+        self.namespaces = self.template_query_collection.namespaceManager
         self.namespaces.bind("rdf", RDF)
         self.namespaces.bind("rdfs", RDFS)
         self.namespaces.bind("foaf", FOAF)
@@ -71,80 +82,26 @@ class GraphCatalog(CatalogPlugin):
         """Load the graph into a local storage"""
         # specify format due to https://github.com/ad-freiburg/qlever/issues/1372
         store = SPARQLStore(query_endpoint=self.endpoint, returnFormat="turtle")
+        remote_query_template = self.template_query_collection.get("remote_query")
+        remote_query = remote_query_template.p()
+        remote_query["query_object"] += self.order_offset_limit
         remote_graph = Graph(store=store, namespace_manager=self.namespaces)
-        remote_query = (
-            dedent("""
-            CONSTRUCT {
-              ?page foaf:primaryTopic ?topic;
-                    dc:title ?title;
-                    dcterms:medium rdact:1018 .
-              ?snapshot dcterms:isPartOf ?page ;
-                    dcterms:medium rdact:1018 ;
-                    rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-                    rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-                    rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
-                    dc:identifier ?identifier ;
-                    bibo:issue ?datestamp ;
-                    wdrs:describedby ?description .
-              ?description dcterms:modified ?modification .
-            } WHERE {
-              ?page foaf:primaryTopic ?topic;
-                    dc:title ?title;
-                    dcterms:medium rdact:1018 .
-              ?snapshot dcterms:isPartOf ?page ;
-                    dcterms:medium rdact:1018 ;
-                    rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-                    rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-                    rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
-                    dc:identifier ?identifier ;
-                    bibo:issue ?datestamp ;
-                    wdrs:describedby ?description .
-              ?description dcterms:modified ?modification .
-              filter(?modification < "2020-01-01T00:00:00.000"^^xsd:dateTime)
-              optional {
-                ?snapshot a ?snapshot_type
-              }
-              filter (!bound(?snapshot_type))
-            }
-            """)
-            + self.order_offset_limit
-        )
+
         logger.debug(f"remote_query: {remote_query}")
         logger.debug(f"self.endpoint: {self.endpoint}")
-        remote_result = remote_graph.query(remote_query)
+
+        remote_result = remote_graph.query(**remote_query)
+
         temporary_graph = remote_result.graph
         temporary_graph.namespace_manager = self.namespaces
         logger.debug(temporary_graph.serialize(format="text/turtle"))
-        local_query = (
-            dedent("""
-            CONSTRUCT {
-              ?page foaf:primaryTopic ?topic;
-                    dc:title ?title;
-                    dcterms:medium rdact:1018 ;
-                    ?pp ?po .
-              ?snapshot dcterms:isPartOf ?page ;
-                        dc:identifier ?identifier, ?idn ;
-                        gndo:gndIdentifier ?idn ;
-                        wdrs:describedby ?description ;
-                        ?sp ?so .
-              ?description dcterms:modified ?modification .
-            } WHERE {
-              ?page foaf:primaryTopic ?topic;
-                    dc:title ?title;
-                    dcterms:medium rdact:1018 ;
-                    ?pp ?po .
-              ?snapshot dcterms:isPartOf ?page ;
-                  dc:identifier ?identifier ;
-                  wdrs:describedby ?description ;
-                  ?sp ?so .
-              ?description dcterms:modified ?modification .
-              bind(SUBSTR(str(?identifier), 9) as ?idn)
-            }
-        """)
-            + self.order_offset_limit
-        )
+        local_query_template = self.template_query_collection.get("local_query")
+        local_query = local_query_template.p()
+        local_query["query_object"] += self.order_offset_limit
         logger.debug(f"local_query: {local_query}")
-        local_result = temporary_graph.query(local_query)
+
+        local_result = temporary_graph.query(**local_query)
+
         graph_file_io, _ = self.storage_backend.retrieve("graph_file.ttl", "wb")
         website_graph = local_result.graph
         website_graph.namespace_manager = self.namespaces

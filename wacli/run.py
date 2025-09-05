@@ -12,6 +12,7 @@ from .plugin_manager import PluginManager
 @click.option("--endpoint", envvar="SPARQL_TITLE_DATA", default=None)
 @click.option("--graph-file", envvar="WEBSITE_GRAPH_FILE", default=None)
 @click.option("--graph-limit", envvar="WEBSITE_GRAPH_LIMIT", default=None)
+@click.option("--query-collection-dir", envvar="QUERY_COLLECTION_DIR", default=None)
 @click.option("--aras-rest-base", envvar="ARAS_REST_BASE", default=None)
 @click.option("--aras-repo", envvar="ARAS_REPO", default=None)
 @click.option("--warc-dir", "--warc-directory", envvar="WARC_DIRECTORY", default=None)
@@ -27,6 +28,7 @@ def cli(
     endpoint,
     graph_file,
     graph_limit,
+    query_collection_dir,
     aras_rest_base,
     aras_repo,
     warc_dir,
@@ -41,6 +43,7 @@ def cli(
                 "module": "wacli_plugins.catalog.graph",
                 "endpoint": endpoint,
                 "limit": graph_limit,
+                "query_collection_backend": "catalog_query_collection_backend",
                 "storage_backend": "catalog_backend",
             }
         ],
@@ -61,6 +64,12 @@ def cli(
             {
                 "module": "wacli_plugins.storage.directory",
                 "path": warc_dir,
+            }
+        ],
+        "catalog_query_collection_backend": [
+            {
+                "module": "wacli_plugins.storage.directory",
+                "path": query_collection_dir,
             }
         ],
         "local_recompressed_repository": [
