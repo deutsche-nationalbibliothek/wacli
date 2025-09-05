@@ -11,7 +11,7 @@ from loguru import logger
 
 from wacli.plugin_manager import ConfigurationError
 from wacli.plugin_types import StoragePlugin, StorageStream, StoreItem
-from wacli_plugins.catalog.graph import RDF, WASE
+from wacli_plugins.catalog.graph import RDF, WASE, RDFS
 
 
 class DirectoryStorage(StoragePlugin):
