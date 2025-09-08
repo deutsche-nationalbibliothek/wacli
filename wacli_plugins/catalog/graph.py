@@ -97,7 +97,6 @@ class GraphCatalog(CatalogPlugin):
         logger.debug(temporary_graph.serialize(format="text/turtle"))
         local_query_template = self.template_query_collection.get("local_query")
         local_query = local_query_template.p()
-        local_query["query_object"] += self.order_offset_limit
         logger.debug(f"local_query: {local_query}")
 
         local_result = temporary_graph.query(**local_query)
