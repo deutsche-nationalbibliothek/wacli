@@ -1,6 +1,7 @@
 CONSTRUCT {
     ?page foaf:primaryTopic ?topic;
         dc:title ?title;
+        dc:identifier ?pageIdentifier ;
         dcterms:medium rdact:1018 .
     ?snapshot dcterms:isPartOf ?page ;
         dcterms:medium rdact:1018 ;
@@ -14,6 +15,7 @@ CONSTRUCT {
 } WHERE {
     ?page foaf:primaryTopic ?topic;
         dc:title ?title;
+        dc:identifier ?pageIdentifier ;
         dcterms:medium rdact:1018 .
     ?snapshot dcterms:isPartOf ?page ;
         dcterms:medium rdact:1018 ;

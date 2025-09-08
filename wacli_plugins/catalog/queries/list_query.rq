@@ -1,7 +1,17 @@
+prefix bibo: <http://purl.org/ontology/bibo/>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix rdau: <http://rdaregistry.info/Elements/u/>
 prefix dcterms: <http://purl.org/dc/terms/>
-prefix gndo: <https://d-nb.info/standards/elementset/gnd#>
-
-select distinct ?idn {
-    ?snapshot dcterms:isPartOf ?page .
-    ?snapshot gndo:gndIdentifier ?idn .
+prefix lv:   <http://purl.org/lobid/lv#>
+prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+select ?idn {
+    ?resourceIri
+        dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+        rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+        rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
+        rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+        dcterms:isPartOf ?work ;
+        bibo:issue ?datestamp ;
+        dc:identifier ?idn .
+        filter(substr(?idn, 1, 1) != "(")
 }

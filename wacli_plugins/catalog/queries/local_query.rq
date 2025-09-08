@@ -5,7 +5,6 @@ CONSTRUCT {
         ?pp ?po .
     ?snapshot dcterms:isPartOf ?page ;
             dc:identifier ?identifier, ?idn ;
-            gndo:gndIdentifier ?idn ;
             wdrs:describedby ?description ;
             ?sp ?so .
     ?description dcterms:modified ?modification .
