@@ -7,8 +7,7 @@ from wacli.plugin_manager import PluginManager
 from .utils import copy_file
 
 
-def get_plugin_config(endpoint, graph_path, query_path = None):
-
+def get_plugin_config(endpoint, graph_path, query_path=None):
     config = {
         "test_catalog": [
             {
@@ -26,7 +25,9 @@ def get_plugin_config(endpoint, graph_path, query_path = None):
     }
 
     if query_path:
-        config["test_catalog"][0]["query_collection_backend"] = "query_collection_backend"
+        config["test_catalog"][0]["query_collection_backend"] = (
+            "query_collection_backend"
+        )
         config["query_collection_backend"] = [
             {
                 "module": "wacli_plugins.storage.directory",
@@ -98,6 +99,7 @@ def test_graph_catalog_initialize(tmp_path):
     idn_list = test_catalog.list()
 
     assert "1234567890" in idn_list
+
 
 def test_graph_catalog_initialize_without_query_collection_backend(tmp_path):
     # prepare
