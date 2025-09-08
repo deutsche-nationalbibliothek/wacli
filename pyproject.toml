@@ -55,10 +55,10 @@ lint.select = [
 addopts="--cov=wacli --cov=wacli_plugins"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.4.4"
-respx = "^0.21.1"
+ruff = "^0.12.12"
+respx = "^0.22.0"
 pytest = "^8.3.2"
-pytest-cov = "^5.0.0"
+pytest-cov = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]
