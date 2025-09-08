@@ -119,12 +119,11 @@ class GraphCatalog(CatalogPlugin):
     def list(self) -> list:
         """List available web archive entries by IDN."""
         website_graph = self._get_graph()
-        idn_result = website_graph.query("""
-            select distinct ?idn {
-                ?snapshot dcterms:isPartOf ?page .
-                ?snapshot gndo:gndIdentifier ?idn .
-            }
-        """)
+
+        list_query_template = self.template_query_collection.get("list_query")
+        list_query = list_query_template.p()
+        logger.debug(f"list_query: {list_query}")
+        idn_result = website_graph.query(**list_query)
         return [row["idn"].value for row in idn_result]
 
     def _get_archive_resource(self, id: URIRef | str):

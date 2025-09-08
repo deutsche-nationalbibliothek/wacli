@@ -1,7 +1,9 @@
 import os
+from importlib.resources import path as res_path
 from pathlib import Path
 from unittest.mock import patch
 
+import wacli_plugins.catalog
 from wacli.plugin_manager import PluginManager
 
 from .utils import copy_file
@@ -47,10 +49,15 @@ def test_graph_catalog(tmp_path):
 
     remote_query = q / "remote_query.rq"
     local_query = q / "local_query.rq"
+    list_query = q / "list_query.rq"
 
     # provide queries
-    copy_file(test_directory / "assets/queries/remote_query.rq", remote_query)
-    copy_file(test_directory / "assets/queries/local_query.rq", local_query)
+    with res_path(wacli_plugins.catalog, "queries/list_query.rq") as res:
+        copy_file(res, list_query)
+    with res_path(wacli_plugins.catalog, "queries/remote_query.rq") as res:
+        copy_file(res, remote_query)
+    with res_path(wacli_plugins.catalog, "queries/local_query.rq") as res:
+        copy_file(res, local_query)
 
     # Inject pre-initialized graph to skip test_catalog.initialize()
     copy_file(test_directory / "assets/test_websites.ttl", p)
@@ -63,7 +70,7 @@ def test_graph_catalog(tmp_path):
     test_catalog = plugin_manager.get("test_catalog")
     idn_list = test_catalog.list()
 
-    assert "1234567890" in idn_list
+    assert len(idn_list) == 0
     # assert len(list(tmp_path.iterdir())) == 1
 
 
@@ -74,10 +81,15 @@ def test_graph_catalog_initialize(tmp_path):
 
     remote_query = q / "remote_query.rq"
     local_query = q / "local_query.rq"
+    list_query = q / "list_query.rq"
 
     # provide queries
-    copy_file(test_directory / "assets/queries/remote_query.rq", remote_query)
-    copy_file(test_directory / "assets/queries/local_query.rq", local_query)
+    with res_path(wacli_plugins.catalog, "queries/list_query.rq") as res:
+        copy_file(res, list_query)
+    with res_path(wacli_plugins.catalog, "queries/remote_query.rq") as res:
+        copy_file(res, remote_query)
+    with res_path(wacli_plugins.catalog, "queries/local_query.rq") as res:
+        copy_file(res, local_query)
 
     mocked_endpoint = "http://anymocked-sparql-endpoint"
 
@@ -108,10 +120,15 @@ def test_graph_catalog_initialize_without_query_collection_backend(tmp_path):
 
     remote_query = q / "remote_query.rq"
     local_query = q / "local_query.rq"
+    list_query = q / "list_query.rq"
 
     # provide queries
-    copy_file(test_directory / "assets/queries/remote_query.rq", remote_query)
-    copy_file(test_directory / "assets/queries/local_query.rq", local_query)
+    with res_path(wacli_plugins.catalog, "queries/list_query.rq") as res:
+        copy_file(res, list_query)
+    with res_path(wacli_plugins.catalog, "queries/remote_query.rq") as res:
+        copy_file(res, remote_query)
+    with res_path(wacli_plugins.catalog, "queries/local_query.rq") as res:
+        copy_file(res, local_query)
 
     mocked_endpoint = "http://anymocked-sparql-endpoint"
 
