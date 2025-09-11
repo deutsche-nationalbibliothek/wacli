@@ -6,7 +6,7 @@ version = "0.1.0"
 readme = "README.md"
 authors = [{name = "Natanael Arndt", email = "arndtn@gmail.com"}]
 requires-python = '>=3.12,<4.0'
-dependencies = ['rdflib @ git+https://github.com/white-gecko/rdflib@feature/sparql_result_parsing', 'click (>=8.1.7,<9.0.0)', 'loguru (>=0.7.2,<0.8.0)', 'aras-py @ git+https://github.com/deutsche-nationalbibliothek/aras-py', 'uuid6 (>=2024.7.10,<2025.0.0)', 'docker (>=7.1.0,<8.0.0)', 'warcio @ git+https://github.com/deutsche-nationalbibliothek/warcio@wip/recompressorStream', "query-collection (>=0.1.6,<0.2.0)"]
+dependencies = ['rdflib @ git+https://github.com/white-gecko/rdflib@feature/sparql_result_parsing', 'click (>=8.1.7,<9.0.0)', 'loguru (>=0.7.2,<0.8.0)', 'aras-py @ git+https://github.com/deutsche-nationalbibliothek/aras-py', 'uuid6 (>=2024.7.10,<2025.0.0)', 'docker (>=7.1.0,<8.0.0)', 'warcio @ git+https://github.com/deutsche-nationalbibliothek/warcio@wip/recompressorStream', "query-collection (>=0.1.6,<0.2.0)", "boto3 (>=1.40.27,<2.0.0)"]
 
 [project.scripts]
 wacli = "wacli.run:cli"
