@@ -89,7 +89,7 @@ class DirectoryStorage(StoragePlugin):
         stream: StorageStream,
         callback: Callable = None,
     ):
-        """Write the stream to the directory."""
+        """Write a StorageStream to the directory."""
         self._store_stream(self.path, stream, callback)
 
     def _store_stream(self, path, stream, callback: Callable):
