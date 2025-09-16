@@ -132,6 +132,7 @@ def test_retrieve_str(s3_resource):
     content = "some initial text data"
 
     bucket = s3_resource.Bucket(BUCKET_NAME)
+    bucket.create()
     example_file_s3 = bucket.Object(example_file)
     example_file_s3.put(Body=content.encode("utf-8"), ContentType="text/plain")
 
