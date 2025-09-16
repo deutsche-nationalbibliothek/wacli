@@ -1,13 +1,12 @@
 """This is the S3 storage module."""
 
 from io import TextIOBase
-from os import listdir, walk
-from os.path import isdir
 from pathlib import Path
 
 from boto3.session import Session
 from botocore.exceptions import NoCredentialsError
 from loguru import logger
+from smart_open import open
 
 from wacli.plugin_manager import ConfigurationError
 from wacli_plugins.catalog.graph import RDF, RDFS, WASE
@@ -47,6 +46,15 @@ class S3Storage(DirectoryStorage):
             resource_config["endpoint_url"] = endpoint_url
 
         self.s3 = session.resource("s3", **resource_config)
+        self.s3_client = session.client("s3", **resource_config)
+
+    def _get_bucket(self):
+        bucket = self.s3.Bucket(self.bucket_name)
+        logger.debug(f"Bucket: {bucket}")
+        if not bucket.creation_date:
+            logger.info(f"Bucket: {bucket} created")
+            bucket.create()
+        return bucket
 
     def _store_data(self, path: Path, data, metadata, callback=None):
         callbacks = []
@@ -76,11 +84,7 @@ class S3Storage(DirectoryStorage):
 
             try:
                 # Upload the file to MinIO
-                bucket = self.s3.Bucket(self.bucket_name)
-                logger.debug(f"Bucket: {bucket}")
-                if not bucket.creation_date:
-                    logger.info(f"Bucket: {bucket} created")
-                    bucket.create()
+                bucket = self._get_bucket()
                 bucket.upload_fileobj(source_io, str(path), Callback=combined_callback)
             except NoCredentialsError:
                 logger.error("Error: Invalid credentials.")
@@ -99,19 +103,27 @@ class S3Storage(DirectoryStorage):
                     )
 
     def _retrieve(self, path, mode, callback):
-        if "w" in mode:
-            path.parent.mkdir(parents=True, exist_ok=True)
-        return lambda: open(path, mode), {"callback": callback}
+        bucket = self._get_bucket()
+        path = f"s3://{bucket.name}/{path}"
+        return lambda: open(
+            path,
+            mode,
+            transport_params={"client": self.s3_client},
+            compression="disable",
+        ), {"callback": callback}
 
     def list(self) -> list:
-        return [d for d in listdir(self.path) if isdir(self.path / d)]
+        raise NotImplementedError(
+            "list of the top level directories is not yet implemented for s3 but should not be complicated"
+        )
 
     def list_files(self, filter_fn=None) -> list:
-        for subdir, dirs, files in walk(self.path):
-            subdir_p = Path(subdir)
-            files = filter(filter_fn, files) if filter_fn else files
-            for file in files:
-                yield subdir_p / file
+        bucket = self.s3.Bucket(self.bucket_name)
+        files = [obj["Key"] for obj in bucket.objects.all()]
+        if filter_fn:
+            return filter(filter_fn, files)
+        else:
+            return files
 
 
 export = S3Storage
