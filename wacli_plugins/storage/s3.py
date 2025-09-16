@@ -32,12 +32,17 @@ class S3Storage(DirectoryStorage):
         endpoint_url = configuration.get("endpoint_url", None)
 
         # Create a boto3 session
-        session = Session(
-            aws_access_key_id=credentials.get("access_key"),
-            aws_secret_access_key=credentials.get("secret_key"),
-        )
+        session_config = {}
+        if credentials:
+            session_config["aws_access_key_id"] = credentials.get("access_key")
+            session_config["aws_secret_access_key"] = credentials.get("secret_key")
+        session = Session(**session_config)
 
-        self.s3 = session.resource("s3", endpoint_url=endpoint_url)
+        resource_config = {}
+        if endpoint_url:
+            resource_config["endpoint_url"] = endpoint_url
+
+        self.s3 = session.resource("s3", **resource_config)
 
     def _store_data(self, path: Path, data, metadata, callback=None):
         callbacks = []
