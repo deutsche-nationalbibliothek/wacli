@@ -129,11 +129,11 @@ def test_retrieve_str(s3_resource):
 
     test_storage = plugin_manager.get("test_storage")
     example_file = "example_file.txt"
-    p = tmp_path / example_file
     content = "some initial text data"
 
-    with open(p, "w") as fp:
-        fp.write(content)
+    bucket = s3_resource.Bucket(BUCKET_NAME)
+    example_file_s3 = bucket.Object(example_file)
+    example_file_s3.put(Body=content.encode("utf-8"), ContentType="text/plain")
 
     result_content, _ = test_storage.retrieve(example_file)
 
@@ -162,8 +162,12 @@ def test_store_stream(s3_resource):
 
     test_storage.store_stream(storage_stream)
 
-    pt = tmp_path / example_text_file
-    assert pt.read_text() == text_content
-    pb = tmp_path / example_binary_file
-    assert pb.read_text() == binary_content
-    assert len(list(tmp_path.iterdir())) == 2
+    bucket = s3_resource.Bucket(BUCKET_NAME)
+
+    example_file_s3 = bucket.Object(example_text_file)
+    assert example_file_s3.get()["Body"].read().decode("utf-8") == text_content
+
+    example_file_s3 = bucket.Object(example_binary_file)
+    assert example_file_s3.get()["Body"].read() == binary_content_encoded
+
+    assert len(list(bucket.objects.all())) == 2
