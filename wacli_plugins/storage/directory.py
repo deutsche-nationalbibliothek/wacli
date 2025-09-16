@@ -146,9 +146,11 @@ class DirectoryStorage(StoragePlugin):
                 )
 
     def list(self) -> list:
+        """List the top level directories."""
         return [d for d in listdir(self.path) if isdir(self.path / d)]
 
     def list_files(self, filter_fn=None) -> list:
+        """List all files (on all levels) in the storage structure."""
         for subdir, dirs, files in walk(self.path):
             subdir_p = Path(subdir)
             files = filter(filter_fn, files) if filter_fn else files
