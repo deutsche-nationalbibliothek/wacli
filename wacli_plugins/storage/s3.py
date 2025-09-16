@@ -20,6 +20,10 @@ class S3Storage(DirectoryStorage):
     """This is the S3 storage plugin based on boto3."""
 
     def configure(self, configuration):
+        self.path = Path("")
+        """Set an empty string path as base path, since it is used as path prefix
+        by the DirectoryStorage base class"""
+
         bucket_name = configuration.get("bucket_name")
         if bucket_name is None or bucket_name == "":
             raise ConfigurationError(
