@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import IO
 
 from loguru import logger
+from warcio.exceptions import ArchiveLoadFailed
 
 from wacli.plugin_manager import ConfigurationError
 from wacli.plugin_types import StoragePlugin, StorageStream, StoreItem
@@ -70,7 +71,7 @@ class DirectoryStorage(StoragePlugin):
                                 total=metadata["size"],
                                 name=path,
                             )
-            except UnicodeEncodeError as e:
+            except (UnicodeEncodeError, ArchiveLoadFailed) as e:
                 logger.debug(f"Report Exception for id={path}: {e}")
                 if self.catalog:
                     # TODO get from path to id/IRI again
