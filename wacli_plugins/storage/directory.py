@@ -40,8 +40,6 @@ class DirectoryStorage(StoragePlugin):
     def _store_data(self, path, data, metadata, callback=None):
         callbacks = []
         logger.debug(f"source metadata: {metadata}")
-        logger.debug(f"DEFAULT_BUFFER_SIZE is: {DEFAULT_BUFFER_SIZE} (overwritten)")
-        buffer_size = 5219841
         if source_callback := metadata.get("callback", False):
             logger.debug("register source_callback")
             callbacks.append(source_callback)
@@ -58,7 +56,7 @@ class DirectoryStorage(StoragePlugin):
             try:
                 with target() as target_io:
                     source_io.wacli_read = source_io.read
-                    while chunk := source_io.wacli_read(buffer_size):
+                    while chunk := source_io.wacli_read(DEFAULT_BUFFER_SIZE):
                         try:
                             target_io.write(chunk)
                         except TypeError:
@@ -69,7 +67,7 @@ class DirectoryStorage(StoragePlugin):
                             ).encode("utf-8")
                         for callback in callbacks:
                             callback(
-                                advance=buffer_size,
+                                advance=DEFAULT_BUFFER_SIZE,
                                 total=metadata["size"],
                                 name=path,
                             )
