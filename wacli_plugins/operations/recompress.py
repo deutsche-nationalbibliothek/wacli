@@ -34,7 +34,7 @@ class RecompressPlugin(OperationPlugin):
                     else nullcontext(source_io) as source_stream
                 ):
                     logger.debug(f"stream is: {source_io}")
-                    yield RecompressorStream(source_stream, self.verbose)
+                    yield RecompressorStream(source_stream)
 
         return id, data_callback, {**metadata, "compression": "application/gzip"}
 
