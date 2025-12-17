@@ -20,6 +20,8 @@ FROM python:3.14-alpine AS runtime
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
+WORKDIR /app
+
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY wacli ./wacli
